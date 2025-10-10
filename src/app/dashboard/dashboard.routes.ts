@@ -4,6 +4,7 @@ import { AmefComponent } from "./pages/amef/amef.component";
 import { OrganizationalInformationComponent } from "./pages/organizational-information/organizational-information.component";
 import { AnalysisComponent } from "./pages/analysis/analysis.component";
 import { ActionsComponent } from "./pages/actions/actions.component";
+import { GraphicsComponent } from "./pages/graphics/graphics.component";
 
 
 export const dashBoardRoutes: Routes = [
@@ -26,6 +27,10 @@ export const dashBoardRoutes: Routes = [
       {
         path: 'amef/:amefId/analysis/:analysisId/actions',
         component: ActionsComponent
+      },
+      {
+        path: 'graphics',
+        component: GraphicsComponent
       }
     ]
   }
