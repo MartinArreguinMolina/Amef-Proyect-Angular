@@ -1,0 +1,405 @@
+<div class="min-h-screen bg-gradient-to-b from-white to-slate-50 text-slate-800" data-theme="light">
+  <div class="h-1 bg-gradient-to-r from-[#153e75] via-black to-[#153e75]"></div>
+
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200">
+    <div class="h-0.5 bg-gradient-to-r from-[#153e75] via-black to-[#153e75]"></div>
+    <div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-12 h-16 flex items-center justify-between">
+      <nav class="breadcrumbs text-xs sm:text-sm text-slate-500 truncate">
+        <ul>
+          <li routerLink="/"><a class="hover:text-black">Inicio</a></li>
+          <li routerLink="/dashboard"><a class="hover:text-black">AMEFs</a></li>
+          <li class="text-slate-800 font-semibold">Analysis</li>
+        </ul>
+      </nav>
+
+      <!-- Botón para abrir Guía completa -->
+      <label for="guide-modal" class="btn btn-xs sm:btn-sm btn-outline">Guía</label>
+    </div>
+  </header>
+
+  <div class="container mx-auto px-6 lg:px-10 py-6 grid grid-cols-12 gap-6">
+    <!-- LISTA -->
+    <aside class="col-span-12 md:col-span-3">
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-200 flex items-center gap-2">
+          <div class="relative flex-1 min-w-0">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" />
+            </svg>
+            <input #q class="input input-sm input-bordered w-full pl-9 pr-10 bg-white text-slate-900 placeholder:text-slate-500 placeholder:text-[12px] sm:placeholder:text-[13px] border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+              placeholder="Buscar (modo, función, efectos, causas)…" [value]="search()" (input)="setSearch(q.value)" />
+            <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-slate-400 hidden sm:block">⌘K</span>
+          </div>
+          <button class="btn btn-sm bg-[#153e75] hover:bg-black text-white" (click)="newAnalysis()">Nuevo</button>
+        </div>
+
+        <div class="max-h-[72vh] overflow-auto">
+          <div class="p-4 animate-pulse space-y-2" [class.hidden]="analysesRes.status() !== 'loading'">
+            <div class="h-3 bg-slate-100 rounded"></div>
+            <div class="h-3 bg-slate-100 rounded w-2/3"></div>
+            <div class="h-3 bg-slate-100 rounded"></div>
+          </div>
+
+          @for (a of listFiltered(); track a.id) {
+          <button class="relative w-full text-left p-3 sm:p-4 transition-all flex items-start gap-3 border-b border-slate-100 hover:bg-slate-50"
+                  [ngClass]="selected() === a.id ? 'bg-gradient-to-r from-[#f5f9ff] to-white border-l-4 border-[#153e75] shadow-[0_8px_20px_-8px_rgba(21,62,117,0.25)]' : ''"
+                  (click)="select(a.id)">
+            <div class="flex-1 min-w-0">
+              <div class="font-medium truncate text-slate-900">{{ a.failureMode }}</div>
+              <div class="text-xs text-slate-500 truncate">{{ a.systemFunction }}</div>
+              <div class="mt-1 flex items-center gap-2">
+                <span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">S <b>{{ a.severity }}</b></span>
+                <span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">O <b>{{ a.occurrence }}</b></span>
+                <span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">D <b>{{ a.detection }}</b></span>
+              </div>
+            </div>
+            <span class="badge border {{ nprColor(a.npr) }}">{{ a.npr }}</span>
+          </button>
+          }
+
+          <div class="p-6 text-slate-500" [class.hidden]="!(listFiltered().length === 0 && analysesRes.status() !== 'loading')">
+            <div class="rounded-lg border border-dashed border-slate-300 p-4 text-sm">
+              Sin resultados. Crea un <b>nuevo análisis</b> o ajusta la búsqueda.
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- FORM -->
+    <main class="col-span-12 md:col-span-6">
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div class="h-1 bg-[#153e75] rounded-t-2xl"></div>
+
+        <div class="p-6 space-y-7" [formGroup]="form">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900">Detalle del análisis</h3>
+              <p class="text-xs text-slate-500">Sigue la guía para describir bien efectos, causas y controles. S/O/D ajustan el NPR y la AP.</p>
+            </div>
+            <span class="text-xs text-slate-500">ID: {{ form.value.id || 'nuevo' }}</span>
+          </div>
+
+          <!-- Paso 1 y 2 -->
+          <div class="grid grid-cols-12 gap-6">
+            <label class="form-control flex flex-col gap-2 sm:gap-3 col-span-12 md:col-span-6">
+              <span class="label-text text-[13px] font-medium text-slate-700">Sistema / Función</span>
+              <div class="text-[11px] text-slate-500 -mt-1">Qué debe hacer el sistema. <b>No</b> pongas la causa ni el efecto. Ej.: “Mantener presión hidráulica estable”.</div>
+              <input class="input input-bordered bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+                     formControlName="systemFunction" placeholder="Frenos ABS" />
+              <forms-error-label [control]="form.get('systemFunction')!" />
+            </label>
+
+            <label class="form-control flex flex-col gap-2 sm:gap-3 col-span-12 md:col-span-6">
+              <span class="label-text text-[13px] font-medium text-slate-700">Modo de fallo</span>
+              <div class="text-[11px] text-slate-500 -mt-1">Cómo falla la función. Evita causas/efectos. Ej.: “Pérdida de presión”, “Bloqueo intermitente”.</div>
+              <input class="input input-bordered bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+                     formControlName="failureMode" placeholder="Pérdida de presión" />
+              <forms-error-label [control]="form.get('failureMode')!" />
+            </label>
+          </div>
+
+          <!-- Paso 3 y 4 -->
+          <div class="grid grid-cols-12 gap-6">
+            <label class="form-control flex flex-col gap-2 sm:gap-3 col-span-12 lg:col-span-6">
+              <span class="label-text text-[13px] font-medium text-slate-700">Efectos</span>
+              <div class="text-[11px] text-slate-500 -mt-1">Consecuencias (cliente/seguridad/regulación). Guía <b>S</b>. Ej.: “Aumenta distancia de frenado”.</div>
+              <textarea autoResize rows="5" class="textarea textarea-bordered min-h-[140px] bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 leading-relaxed focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+                        formControlName="failureEffects" placeholder="Impacto para cliente/seguridad/regulación…"></textarea>
+              <forms-error-label [control]="form.get('failureEffects')!" />
+            </label>
+
+            <label class="form-control flex flex-col gap-2 sm:gap-3 col-span-12 lg:col-span-6">
+              <span class="label-text text-[13px] font-medium text-slate-700">Causas</span>
+              <div class="text-[11px] text-slate-500 -mt-1">Causas potenciales/raíz (proceso, diseño, material, proveedor, humano). Guía <b>O</b>.</div>
+              <textarea autoResize rows="5" class="textarea textarea-bordered min-h-[140px] bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 leading-relaxed focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+                        formControlName="failureCauses" placeholder="Causa raíz probable, variación del proceso, diseño, proveedor…"></textarea>
+              <forms-error-label [control]="form.get('failureCauses')!" />
+            </label>
+          </div>
+
+          <!-- Paso 5 -->
+          <label class="form-control flex flex-col gap-2 sm:gap-3">
+            <span class="label-text text-[13px] font-medium text-slate-700">Controles de prevención</span>
+            <div class="text-[11px] text-slate-500 -mt-1">Controles actuales (poka-yoke, pruebas, inspecciones, validaciones). Afectan <b>O</b> y <b>D</b>.</div>
+            <textarea autoResize rows="3" class="textarea textarea-bordered min-h-[110px] bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 leading-relaxed focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+                      formControlName="currentControls" placeholder="Inspección, pruebas, poka-yoke, validaciones, etc."></textarea>
+            <forms-error-label [control]="form.get('currentControls')!" />
+          </label>
+
+          <!-- Paso 6: S/O/D con guía compacta -->
+          <div class="grid grid-cols-12 gap-6">
+            <label class="form-control flex flex-col gap-1.5 sm:gap-2 col-span-12 sm:col-span-4">
+              <div class="flex items-center justify-between">
+                <span class="label-text text-[13px] font-medium text-slate-700">Severidad (1–10)</span>
+                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-xs font-semibold">{{ form.value.severity ?? '—' }}</span>
+              </div>
+              <div class="text-[11px] text-slate-500 -mt-1">
+                9–10: peligro/ incumple norma · 7–8: muy insatisfecho/ inoperable seguro ·
+                5–6: degradación/ pérdida parcial · 3–4: leve · 1–2: mínimo
+              </div>
+              <input type="number" min="1" max="10" class="input input-bordered text-center font-mono bg-white text-slate-900 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20" formControlName="severity" />
+              <forms-error-label [control]="form.get('severity')!" />
+            </label>
+
+            <label class="form-control flex flex-col gap-1.5 sm:gap-2 col-span-12 sm:col-span-4">
+              <div class="flex items-center justify-between">
+                <span class="label-text text-[13px] font-medium text-slate-700">Ocurrencia (1–10)</span>
+                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-xs font-semibold">{{ form.value.occurrence ?? '—' }}</span>
+              </div>
+              <div class="text-[11px] text-slate-500 -mt-1">
+                9–10: casi inevitable · 7–8: fallos repetidos · 5–6: ocasionales · 3–4: pocos · 1–2: remotos
+              </div>
+              <input type="number" min="1" max="10" class="input input-bordered text-center font-mono bg-white text-slate-900 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20" formControlName="occurrence" />
+              <forms-error-label [control]="form.get('occurrence')!" />
+            </label>
+
+            <label class="form-control flex flex-col gap-1.5 sm:gap-2 col-span-12 sm:col-span-4">
+              <div class="flex items-center justify-between">
+                <span class="label-text text-[13px] font-medium text-slate-700">Detección (1–10)</span>
+                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-xs font-semibold">{{ form.value.detection ?? '—' }}</span>
+              </div>
+              <div class="text-[11px] text-slate-500 -mt-1">
+                9–10: no hay método/ no detecta · 7–8: alta prob. de no detectar · 5–6: moderada · 3–4: baja · 1–2: detecta casi seguro
+              </div>
+              <input type="number" min="1" max="10" class="input input-bordered text-center font-mono bg-white text-slate-900 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20" formControlName="detection" />
+              <forms-error-label [control]="form.get('detection')!" />
+            </label>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- RESUMEN + Guía rápida -->
+    <aside class="col-span-12 md:col-span-3">
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div class="p-6 space-y-5" [formGroup]="form">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-xs uppercase tracking-wide text-slate-500">AP — Prioridad de acción</div>
+              <div class="mt-2 flex items-center gap-2">
+                <span class="inline-flex items-center justify-center h-7 px-3 rounded-full border text-sm font-bold" [ngClass]="apClass(ap)">{{ ap ?? '—' }}</span>
+                <span class="text-xs text-slate-500" [class.hidden]="!ap">({{ apText(ap) }})</span>
+              </div>
+            </div>
+
+            <div class="text-right">
+              <div class="text-[10px] uppercase text-slate-500">NPR</div>
+              <div class="mt-1">
+                <span class="inline-flex items-center justify-center w-12 h-12 rounded-full border"
+                      [ngClass]="{
+                        'border-red-300 bg-red-50 text-red-700': (form.value.npr ?? 0) >= 200,
+                        'border-amber-300 bg-amber-50 text-amber-700': (form.value.npr ?? 0) >= 100 && (form.value.npr ?? 0) < 200,
+                        'border-emerald-300 bg-emerald-50 text-emerald-700': (form.value.npr ?? 0) > 0 && (form.value.npr ?? 0) < 100,
+                        'border-slate-200 bg-slate-50 text-slate-500': !(form.value.npr)
+                      }">
+                  <span class="text-sm font-extrabold">{{ form.value.npr ?? '—' }}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <div class="text-center">
+              <div class="text-[10px] text-slate-500 mb-0.5">S</div>
+              <div class="px-2 py-1 rounded bg-slate-100 text-slate-700 text-xs font-semibold">{{ form.value.severity ?? '—' }}</div>
+            </div>
+            <div class="text-center">
+              <div class="text-[10px] text-slate-500 mb-0.5">O</div>
+              <div class="px-2 py-1 rounded bg-slate-100 text-slate-700 text-xs font-semibold">{{ form.value.occurrence ?? '—' }}</div>
+            </div>
+            <div class="text-center">
+              <div class="text-[10px] text-slate-500 mb-0.5">D</div>
+              <div class="px-2 py-1 rounded bg-slate-100 text-slate-700 text-xs font-semibold">{{ form.value.detection ?? '—' }}</div>
+            </div>
+          </div>
+
+          <div class="divider my-1"></div>
+
+          <div class="flex flex-col gap-2">
+            <button class="btn btn-md bg-[#153e75] hover:bg-black text-white" (click)="save()" [disabled]="saving()">Guardar</button>
+            <button class="btn btn-md btn-outline border-slate-300 text-slate-800" (click)="newAnalysis()">Nuevo</button>
+            <button class="btn btn-md btn-outline border-red-200 text-red-700 hover:bg-red-600 hover:text-white" (click)="delete()" [disabled]="!form.value.id">Eliminar</button>
+          </div>
+
+          <div class="divider my-1"></div>
+
+          <!-- Guía rápida (colapsable) -->
+          <details class="collapse collapse-arrow bg-slate-50 border border-slate-200 rounded-lg">
+            <summary class="collapse-title text-sm font-semibold">Guía rápida AMEF</summary>
+            <div class="collapse-content text-[12px] leading-5 space-y-2">
+              <div>
+                <div class="font-semibold text-slate-700 mb-1">1) Flujo</div>
+                <ol class="list-decimal ml-4 space-y-1">
+                  <li>Define <b>Sistema/Función</b> ➜ <b>Modo de fallo</b>.</li>
+                  <li>Describe <b>Efectos</b> (cliente/seguridad/regulación) ➜ valora <b>S</b>.</li>
+                  <li>Identifica <b>Causas</b> ➜ valora <b>O</b>.</li>
+                  <li>Lista <b>Controles</b> existentes ➜ valora <b>D</b>.</li>
+                  <li>Calcula <b>NPR = S×O×D</b> y revisa <b>AP</b>.</li>
+                </ol>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2">
+                <div class="p-2 rounded bg-white border">
+                  <div class="font-semibold text-slate-700">Severidad</div>
+                  <ul class="mt-1 space-y-0.5">
+                    <li><b>9–10</b> Peligro / incumple normas</li>
+                    <li><b>7–8</b> Muy insatisfecho / inoperable seguro</li>
+                    <li><b>5–6</b> Degradación / pérdida parcial</li>
+                    <li><b>3–4</b> Leve / la mayoría lo detecta</li>
+                    <li><b>1–2</b> Mínimo</li>
+                  </ul>
+                </div>
+                <div class="p-2 rounded bg-white border">
+                  <div class="font-semibold text-slate-700">Ocurrencia</div>
+                  <ul class="mt-1 space-y-0.5">
+                    <li><b>9–10</b> Casi inevitable</li>
+                    <li><b>7–8</b> Fallos repetidos</li>
+                    <li><b>5–6</b> Ocasionales</li>
+                    <li><b>3–4</b> Pocos</li>
+                    <li><b>1–2</b> Remotos</li>
+                  </ul>
+                </div>
+                <div class="p-2 rounded bg-white border">
+                  <div class="font-semibold text-slate-700">Detección</div>
+                  <ul class="mt-1 space-y-0.5">
+                    <li><b>9–10</b> Sin método / no detecta</li>
+                    <li><b>7–8</b> Alta prob. de no detectar</li>
+                    <li><b>5–6</b> Prob. moderada</li>
+                    <li><b>3–4</b> Prob. baja</li>
+                    <li><b>1–2</b> Detecta casi seguro</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="p-2 rounded bg-white border">
+                <div class="font-semibold text-slate-700 mb-1">Checklist antes de guardar</div>
+                <ul class="list-disc ml-4 space-y-1">
+                  <li>Función y <b>Modo</b> de fallo escritos en lenguaje técnico, sin mezclar causas/efectos.</li>
+                  <li>Efectos cubren <b>cliente</b>, <b>seguridad</b> y <b>regulación</b>.</li>
+                  <li>Causas → una por renglón; evita “genéricos” como “error humano” sin detalle.</li>
+                  <li>Controles indican si son de <b>prevención</b> o <b>detección</b>.</li>
+                  <li>Valores de <b>S/O/D</b> coherentes con la escala.</li>
+                </ul>
+              </div>
+
+              <div class="text-[11px] text-slate-500">
+                <b>Reglas de oro:</b> 1) Elimina el modo de fallo si es posible. 2) Si no, elimina la causa. 3) Si no, mejora prevención/detección (bajar O o D).
+              </div>
+            </div>
+          </details>
+
+          <div class="divider my-1"></div>
+
+          <div>
+            @if(form.value.id){
+            <div class="text-sm font-semibold mb-1">Acciones correctivas</div>
+            <button [routerLink]="[form.value.id, 'actions']" class="btn btn-xs btn-outline w-full">Ver / gestionar acciones</button>
+            <p class="mt-2 text-[11px] text-slate-500">Añade responsables y recalcula el NPR/AP con S/O/D nuevos.</p>
+            }
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Toast -->
+  <div class="fixed bottom-4 right-4 z-50" [class.hidden]="!toast()">
+    <div class="flex items-center gap-3 rounded-xl px-4 py-3 text-white shadow-lg ring-1 ring-black/5 transition-all duration-300"
+         [ngClass]="{
+           'bg-emerald-600': toast()?.kind === 'success',
+           'bg-sky-600': toast()?.kind === 'update',
+           'bg-rose-600': toast()?.kind === 'delete',
+           'bg-red-600': toast()?.kind === 'error'
+         }" role="status" aria-live="polite">
+      <svg class="w-5 h-5 opacity-90" [class.hidden]="toast()?.kind === 'delete' || toast()?.kind === 'error'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+      <svg class="w-5 h-5 opacity-90" [class.hidden]="toast()?.kind !== 'delete'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      <svg class="w-5 h-5 opacity-90" [class.hidden]="toast()?.kind !== 'error'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"/></svg>
+      <span class="text-sm font-medium truncate max-w-[56ch]">{{ toast()?.text }}</span>
+      <button type="button" class="ml-1 -mr-1 rounded-md/80 bg-white/10 hover:bg-white/20 px-1.5 py-1 text-xs" aria-label="Cerrar notificación" (click)="closeToast()">✕</button>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: Guía completa ============ -->
+  <input type="checkbox" id="guide-modal" class="modal-toggle" />
+  <div class="modal">
+    <div class="modal-box max-w-4xl">
+      <div class="flex items-start justify-between mb-3">
+        <h3 class="font-bold text-lg">Guía para realizar un Analysis (AMEF diseño)</h3>
+        <label for="guide-modal" class="btn btn-sm btn-ghost">✕</label>
+      </div>
+
+      <!-- Paso a paso -->
+      <ol class="list-decimal ml-5 space-y-2 text-sm">
+        <li><b>Sistema/Función:</b> qué debe hacer. No pongas causas ni efectos.</li>
+        <li><b>Modo de fallo:</b> cómo falla la función (técnico y específico).</li>
+        <li><b>Efectos:</b> cliente, seguridad y regulación. Esto guía <b>S</b>.</li>
+        <li><b>Causas:</b> raíz probable (proceso/diseño/material/proveedor/humano). Esto guía <b>O</b>.</li>
+        <li><b>Controles actuales:</b> prevención/detección (pruebas, inspecciones, poka-yoke). Esto guía <b>D</b>.</li>
+        <li><b>Valora S/O/D</b> con la escala y calcula <b>NPR = S×O×D</b>. Revisa la <b>AP</b>.</li>
+      </ol>
+
+      <!-- Escala S/O/D (resumen de tu lámina) -->
+      <div class="grid md:grid-cols-3 gap-3 mt-4 text-sm">
+        <div class="rounded-lg border p-3">
+          <div class="font-semibold">Severidad (S)</div>
+          <ul class="mt-1 space-y-0.5">
+            <li><b>9–10</b> Efecto peligroso / incumple regulaciones</li>
+            <li><b>7–8</b> Muy insatisfecho / inoperable pero seguro</li>
+            <li><b>5–6</b> Degradación del rendimiento / pérdida parcial</li>
+            <li><b>3–4</b> Efecto leve / la mayoría lo detecta</li>
+            <li><b>1–2</b> Efecto mínimo / no molesto</li>
+          </ul>
+        </div>
+        <div class="rounded-lg border p-3">
+          <div class="font-semibold">Ocurrencia (O)</div>
+          <ul class="mt-1 space-y-0.5">
+            <li><b>9–10</b> Muy alta (casi inevitable)</li>
+            <li><b>7–8</b> Alta (fallos repetidos)</li>
+            <li><b>5–6</b> Moderada (ocasionales)</li>
+            <li><b>3–4</b> Baja (pocos fallos)</li>
+            <li><b>1–2</b> Remota (improbables)</li>
+          </ul>
+        </div>
+        <div class="rounded-lg border p-3">
+          <div class="font-semibold">Detección (D)</div>
+          <ul class="mt-1 space-y-0.5">
+            <li><b>9–10</b> No hay método / no detecta la causa/fallo</li>
+            <li><b>7–8</b> Alta probabilidad de no detección</li>
+            <li><b>5–6</b> Probabilidad moderada de no detección</li>
+            <li><b>3–4</b> Probabilidad baja de no detección</li>
+            <li><b>1–2</b> El control lo detecta casi con seguridad</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Ejemplos cortos -->
+      <div class="mt-4 grid md:grid-cols-2 gap-3 text-sm">
+        <div class="rounded-lg border p-3 bg-slate-50">
+          <div class="font-semibold mb-1">Ejemplo (frenos ABS)</div>
+          <div><b>Función:</b> Mantener control de frenado.</div>
+          <div><b>Modo:</b> Pérdida de presión hidráulica.</div>
+          <div><b>Efecto:</b> Aumento de distancia de frenado (seguridad).</div>
+          <div><b>Causas:</b> Fuga sello bomba / burbujas en circuito.</div>
+          <div><b>Controles:</b> Prueba de estanqueidad 100% / purga automatizada.</div>
+          <div class="mt-1"><b>S/O/D:</b> 8 / 4 / 3 → <b>NPR 96</b> • <b>AP</b> media.</div>
+        </div>
+        <div class="rounded-lg border p-3">
+          <div class="font-semibold mb-1">Checklist rápido</div>
+          <ul class="list-disc ml-4 space-y-1">
+            <li>Modo ≠ causa ≠ efecto.</li>
+            <li>Efectos consideran cliente/seguridad/regulación.</li>
+            <li>Causas específicas (evita “error humano” sin detalle).</li>
+            <li>Controles: indica si son de prevención o detección.</li>
+            <li>Valores S/O/D dentro de 1–10 y acordes a la escala.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal-action">
+        <label for="guide-modal" class="btn">Entendido</label>
+      </div>
+    </div>
+    <label class="modal-backdrop" for="guide-modal"></label>
+  </div>
+</div>

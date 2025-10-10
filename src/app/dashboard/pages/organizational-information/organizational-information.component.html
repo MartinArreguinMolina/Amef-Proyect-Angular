@@ -1,0 +1,421 @@
+<form (keydown.enter)="$event.preventDefault()" [formGroup]="fb" (ngSubmit)="onSubmit()"
+  class="min-h-screen bg-white text-slate-800" data-theme="light">
+
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200">
+    <div class="h-0.5 bg-gradient-to-r from-[#153e75] via-black to-[#153e75]"></div>
+    <div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-12 h-16 flex items-center justify-between">
+      <nav class="breadcrumbs text-xs sm:text-sm text-slate-500 truncate">
+        <ul>
+          <li routerLink="/"><a class="hover:text-black">Inicio</a></li>
+          <li routerLink="/dashboard"><a class="hover:text-black">AMEFs</a></li>
+          <li class="text-slate-800 font-semibold">Información organizacional</li>
+        </ul>
+      </nav>
+      <div class="hidden md:flex items-center gap-2">
+        <button type="button" class="btn btn-ghost btn-sm text-slate-800 hover:bg-slate-100">Cancelar</button>
+        <button class="btn btn-sm bg-[#153e75] hover:bg-black text-white shadow-sm"
+          (click)="onSubmit()">Guardar</button>
+      </div>
+      <div class="md:hidden flex items-center gap-2">
+        <button type="button" class="btn btn-ghost btn-sm">Cancelar</button>
+        <button class="btn btn-sm bg-[#153e75] hover:bg-black text-white" (click)="onSubmit()">Guardar</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Encabezado sección -->
+  <section class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-12 pt-6 sm:pt-8">
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-md">
+      <div class="h-1 rounded-t-2xl bg-[#153e75]/80"></div>
+      <div class="p-5 sm:p-6 md:p-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div class="min-w-0">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">
+              <span class="text-[#0f2e58]">Información</span> <span class="text-black">Organizacional</span>
+            </h1>
+            <p class="mt-1 text-slate-600 text-sm sm:text-base">
+              Captura datos base para el encabezado AMEF con estandarización y trazabilidad.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="px-3 py-1 rounded-md border border-slate-200 bg-slate-50 text-slate-800 text-xs sm:text-sm">Formato AMEF</span>
+            <span class="px-3 py-1 rounded-md border border-slate-200 bg-slate-50 text-slate-800 text-xs sm:text-sm">Industria automotriz</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contenido -->
+  <section class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-12 py-6 sm:py-8">
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
+
+      <!-- Formulario -->
+      <div class="xl:col-span-8">
+        <div class="rounded-2xl border border-slate-200 bg-white shadow-md overflow-hidden">
+          <div class="h-1 bg-[#153e75]/80"></div>
+          <div class="card-body p-5 sm:p-6 md:p-8">
+            <div class="space-y-8 sm:space-y-10">
+
+              <!-- Equipo -->
+              <fieldset class="space-y-3 sm:space-y-4">
+                <legend class="text-base sm:text-lg font-semibold text-[#153e75] flex items-center gap-2">
+                  <span class="inline-grid place-items-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#e6eef8] text-[#153e75]">1</span>
+                  Equipo responsable <span class="text-red-500">*</span>
+                  <span class="tooltip tooltip-right" data-tip="Incluye funciones clave: Calidad, Proceso/Producción, Diseño/Producto, Proveedores y Mantenimiento. Escribe varios separados por coma.">
+                    <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                    </svg>
+                  </span>
+                </legend>
+
+                <div class="rounded-xl border-2 border-dashed border-slate-300/90 bg-slate-50 p-3 sm:p-4">
+                  <div class="join w-full flex flex-col sm:flex-row">
+                    <input formControlName="team"
+                      class="input input-bordered join-item w-full border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+                      placeholder="Calidad, Producción, Ingeniería de Producto…" />
+                    <button type="button"
+                      class="btn join-item bg-[#153e75] hover:bg-black text-white w-full sm:w-auto mt-2 sm:mt-0 shadow-sm">
+                      Agregar
+                    </button>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-2">Sugerencia: usa coma para listar varias áreas/personas.</p>
+                </div>
+                <forms-error-label [control]="fb.get('team')!" />
+              </fieldset>
+
+              <!-- Identificación -->
+              <fieldset class="space-y-4 sm:space-y-6">
+                <legend class="text-base sm:text-lg font-semibold text-[#153e75] flex items-center gap-2">
+                  <span class="inline-grid place-items-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#e6eef8] text-[#153e75]">2</span>
+                  Identificación del AMEF
+                  <span class="tooltip tooltip-right" data-tip="Define un único alcance: Sistema, Subsistema o Componente. Evita rellenar más de uno para no duplicar el análisis.">
+                    <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                    </svg>
+                  </span>
+                </legend>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <!-- Código de proyecto -->
+                  <label class="form-control w-full">
+                    <div class="label py-1">
+                      <span class="label-text font-medium text-slate-900 flex items-center gap-2">
+                        Código del proyecto
+                        <span class="tooltip tooltip-right" data-tip="Identificador interno del proyecto (no del producto). Ej.: P-AX34-2025. Mantiene la trazabilidad entre AMEF y plan del proyecto.">
+                          <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                          </svg>
+                        </span>
+                      </span>
+                    </div>
+                    <div class="relative">
+                      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M20 7H4m16 5H4m16 5H4" />
+                      </svg>
+                      <input type="text" minlength="1" placeholder="Ej.: P-AX34-2025"
+                        class="input input-bordered w-full pl-10 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+                        formControlName="proyectCode" />
+                    </div>
+                    <forms-error-label [control]="fb.get('proyectCode')!" />
+                  </label>
+
+                  <!-- Departamento líder -->
+                  <label class="form-control w-full">
+                    <div class="label py-1">
+                      <span class="label-text font-medium text-slate-900 flex items-center gap-2">
+                        Departamento líder
+                        <span class="tooltip tooltip-right" data-tip="Área responsable de emitir y mantener el AMEF: p. ej., Ingeniería de Calidad, Ingeniería de Producto o Manufacturing Engineering.">
+                          <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                          </svg>
+                        </span>
+                      </span>
+                    </div>
+                    <div class="relative">
+                      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <path d="M7 10h10" />
+                        <path d="M12 2v8" />
+                      </svg>
+                      <input type="text" minlength="1" placeholder="Ej.: Ingeniería de Calidad"
+                        class="input input-bordered w-full pl-10 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+                        formControlName="leadingDepartment" />
+                    </div>
+                    <forms-error-label [control]="fb.get('leadingDepartment')!" />
+                  </label>
+
+                  <!-- Sistema -->
+                  <label class="form-control w-full">
+                    <div class="label py-1">
+                      <span class="label-text font-medium text-slate-900 flex items-center gap-2">
+                        Sistema
+                        <span class="tooltip tooltip-right" data-tip="Nivel macro del alcance. Ej.: 'Frenos ABS'. Si llenas este campo, deja Subsistema y Componente vacíos.">
+                          <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                          </svg>
+                        </span>
+                      </span>
+                    </div>
+                    <input #system (input)="disableSystem(system.value)" type="text" minlength="1"
+                      placeholder="Ej.: Sistema de Frenos"
+                      class="input input-bordered w-full border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+                      formControlName="system" />
+                    <forms-error-label [control]="fb.get('system')!" />
+                  </label>
+
+                  <!-- Subsistema -->
+                  <label class="form-control w-full">
+                    <div class="label py-1">
+                      <span class="label-text font-medium text-slate-900 flex items-center gap-2">
+                        Subsistema
+                        <span class="tooltip tooltip-right" data-tip="Nivel intermedio. Ej.: 'Hidráulico'. Usa sólo uno entre Sistema / Subsistema / Componente.">
+                          <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                          </svg>
+                        </span>
+                      </span>
+                    </div>
+                    <input #subsystem (input)="disableSubsystem(subsystem.value)" type="text" minlength="1"
+                      placeholder="Ej.: Hidráulico"
+                      class="input input-bordered w-full border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+                      formControlName="subsystem" />
+                    <forms-error-label [control]="fb.get('subsystem')!" />
+                  </label>
+
+                  <!-- Componente -->
+                  <label class="form-control w-full">
+                    <div class="label py-1">
+                      <span class="label-text font-medium text-slate-900 flex items-center gap-2">
+                        Componente
+                        <span class="tooltip tooltip-right" data-tip="Nivel más específico. Ej.: 'Bomba'. Si lo completas, no llenes Sistema ni Subsistema.">
+                          <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                          </svg>
+                        </span>
+                      </span>
+                    </div>
+                    <input #component (input)="disableComponent(component.value)" type="text" minlength="1"
+                      placeholder="Ej.: Bomba"
+                      class="input input-bordered w-full border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+                      formControlName="component" />
+                    <forms-error-label [control]="fb.get('component')!" />
+                  </label>
+                </div>
+
+                <div class="mt-1 text-[11px] text-slate-500">
+                  <span class="badge bg-slate-100 text-slate-700 border-slate-200">Elige 1 de 3</span>
+                  Completa sólo uno entre <b>Sistema</b>, <b>Subsistema</b> o <b>Componente</b> para definir el alcance.
+                </div>
+              </fieldset>
+
+              <!-- Fechas -->
+              <fieldset class="space-y-4 sm:space-y-6">
+                <legend class="text-base sm:text-lg font-semibold text-[#153e75] flex items-center gap-2">
+                  <span class="inline-grid place-items-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#e6eef8] text-[#153e75]">3</span>
+                  Fechas & Responsable
+                  <span class="tooltip tooltip-right" data-tip="Fecha de origen ≤ hoy ≤ Fecha objetivo. Mantén alineación con el plan de proyecto.">
+                    <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                    </svg>
+                  </span>
+                </legend>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                  <!-- Origen -->
+                  <label class="form-control w-full">
+                    <div class="label py-1">
+                      <span class="label-text font-medium text-slate-900 flex items-center gap-2">
+                        Fecha de origen
+                        <span class="tooltip tooltip-right" data-tip="Inicio del AMEF. Normalmente coincide con el arranque del proyecto o del cambio.">
+                          <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                          </svg>
+                        </span>
+                      </span>
+                    </div>
+                    <input type="date"
+                      class="input input-bordered w-full border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+                      formControlName="dateOfOrigin" />
+                    <forms-error-label [control]="fb.get('dateOfOrigin')!" />
+                  </label>
+
+                  <!-- Target -->
+                  <label class="form-control w-full">
+                    <div class="label py-1">
+                      <span class="label-text font-medium text-slate-900 flex items-center gap-2">
+                        Fecha objetivo
+                        <span class="tooltip tooltip-right" data-tip="Fecha planeada de cierre del AMEF o fase. Debe ser igual o posterior a hoy y coherente con el plan.">
+                          <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                          </svg>
+                        </span>
+                      </span>
+                    </div>
+                    <input type="date"
+                      class="input input-bordered w-full border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+                      formControlName="targetDate" />
+                    <forms-error-label [control]="fb.get('targetDate')!" />
+                  </label>
+                </div>
+              </fieldset>
+
+              <!-- Acciones -->
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3 pt-5 sm:pt-6 border-t border-slate-200">
+                <button type="button" class="btn btn-outline border-black text-black hover:bg-black hover:text-white w-full sm:w-auto">
+                  Cancelar
+                </button>
+                <button type="submit" class="btn bg-[#153e75] hover:bg-black text-white w-full sm:w-auto">
+                  Guardar información
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Guías y estándares -->
+      <aside class="xl:col-span-4">
+        <div class="xl:sticky xl:top-24">
+          <div class="rounded-2xl border border-slate-200 bg-white shadow-md overflow-hidden">
+            <div class="h-1 bg-[#153e75]/80"></div>
+            <div class="card-body p-5 sm:p-6 md:p-8">
+              <h3 class="text-base sm:text-lg font-semibold text-[#153e75]">Guías y estándares</h3>
+              <p class="text-sm text-slate-600">Referencia rápida para el llenado del encabezado AMEF.</p>
+
+              <div class="mt-4 grid gap-2">
+                <!-- Campos 1–9 -->
+                <div class="collapse collapse-arrow border border-slate-200 bg-white">
+                  <input type="checkbox" />
+                  <div class="collapse-title text-sm font-semibold text-slate-800">Campos organizativos (1–9)</div>
+                  <div class="collapse-content text-sm text-slate-600 space-y-2">
+                    <div class="flex items-start gap-2"><span class="badge bg-[#153e75]/10 text-[#153e75] border-[#153e75]/20">1</span>
+                      <div><b>Número AMFE</b> — identificador secuencial interno para trazabilidad.</div>
+                    </div>
+                    <div class="flex items-start gap-2"><span class="badge bg-[#153e75]/10 text-[#153e75] border-[#153e75]/20">2</span>
+                      <div><b>Revisión</b> — número o letra que incrementa en cada actualización (1→2 o A→B).</div>
+                    </div>
+                    <div class="flex items-start gap-2"><span class="badge bg-[#153e75]/10 text-[#153e75] border-[#153e75]/20">3</span>
+                      <div><b>Equipo</b> — participantes del ejercicio (usa coma para múltiples).</div>
+                    </div>
+                    <div class="flex items-start gap-2"><span class="badge bg-[#153e75]/10 text-[#153e75] border-[#153e75]/20">4</span>
+                      <div><b>Sistema / Subsistema / Componente</b> — nivel de alcance que aplica (elige sólo uno).</div>
+                    </div>
+                    <div class="flex items-start gap-2"><span class="badge bg-[#153e75]/10 text-[#153e75] border-[#153e75]/20">5</span>
+                      <div><b>Código del proyecto</b> — identificador interno del proyecto (no “del producto”).</div>
+                    </div>
+                    <div class="flex items-start gap-2"><span class="badge bg-[#153e75]/10 text-[#153e75] border-[#153e75]/20">6</span>
+                      <div><b>Departamento líder</b> — área responsable de emitir y mantener el AMEF.</div>
+                    </div>
+                    <div class="flex items-start gap-2"><span class="badge bg-[#153e75]/10 text-[#153e75] border-[#153e75]/20">7</span>
+                      <div><b>Preparado por</b> — líder/coordinador del AMEF (en tu app viene del usuario autenticado).</div>
+                    </div>
+                    <div class="flex items-start gap-2"><span class="badge bg-[#153e75]/10 text-[#153e75] border-[#153e75]/20">8</span>
+                      <div><b>Fecha de origen</b> — inicio del AMEF (alineada al arranque del proyecto).</div>
+                    </div>
+                    <div class="flex items-start gap-2"><span class="badge bg-[#153e75]/10 text-[#153e75] border-[#153e75]/20">9</span>
+                      <div><b>Fecha target</b> — fecha objetivo de cierre (alineada al plan de diseño/desarrollo).</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Checklist -->
+                <div class="collapse collapse-arrow border border-slate-200 bg-white">
+                  <input type="checkbox" />
+                  <div class="collapse-title text-sm font-semibold text-slate-800">Checklist previo a guardar</div>
+                  <div class="collapse-content text-sm text-slate-600">
+                    <ul class="list-disc ms-5 space-y-1">
+                      <li><b>Equipo</b> tiene al menos un integrante (separado por comas si son varios).</li>
+                      <li>Define <b>solo uno</b> entre <em>Sistema</em>, <em>Subsistema</em> o <em>Componente</em>.</li>
+                      <li><b>Código del proyecto</b> corresponde al identificador interno vigente.</li>
+                      <li><b>Departamento líder</b> correcto (área que mantiene el AMEF).</li>
+                      <li><b>Fechas</b> coherentes: origen ≤ hoy ≤ target.</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Ejemplos -->
+                <div class="collapse collapse-arrow border border-slate-200 bg-white">
+                  <input type="checkbox" />
+                  <div class="collapse-title text-sm font-semibold text-slate-800">Ejemplos rápidos</div>
+                  <div class="collapse-content text-sm text-slate-600 space-y-3">
+                    <div>
+                      <div class="text-slate-700 font-medium">Equipo (CSV)</div>
+                      <pre class="bg-slate-50 border border-slate-200 rounded p-2 overflow-x-auto text-xs">Calidad, Producción, Ingeniería de Producto</pre>
+                    </div>
+                    <div>
+                      <div class="text-slate-700 font-medium">Código del proyecto</div>
+                      <pre class="bg-slate-50 border border-slate-200 rounded p-2 overflow-x-auto text-xs">P-AX34-2025   |   Q3-PLATFORM-BRK-2025</pre>
+                    </div>
+                    <div>
+                      <div class="text-slate-700 font-medium">Nivel de alcance</div>
+                      <pre class="bg-slate-50 border border-slate-200 rounded p-2 overflow-x-auto text-xs">Sistema: "Frenos ABS"
+Subsistema: "Hidráulico"
+Componente: "Bomba"</pre>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Nota editorial -->
+                <div class="alert bg-[#153e75]/5 border border-[#153e75]/20 text-slate-800 mt-2">
+                  <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-[#153e75] mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M13 16h-1v-4h-1" /><path d="M12 8h.01" /><circle cx="12" cy="12" r="10" />
+                    </svg>
+                    <div class="text-sm">
+                      <b>Aclaración:</b> en algunos textos aparece “<em>Código del producto</em>”; en este formato usamos
+                      <b>“Código del proyecto”</b> como identificador interno oficial.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-4">
+                <button class="btn btn-outline w-full border-[#153e75] text-[#153e75] hover:bg-[#153e75] hover:text-white">
+                  Guardar borrador
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </section>
+
+  <!-- Acciones móviles -->
+  <div class="md:hidden fixed bottom-0 inset-x-0 border-t border-slate-200 bg-white/95 backdrop-blur p-3">
+    <div class="mx-auto max-w-screen-xl px-4 flex items-center gap-2">
+      <button type="button" class="btn btn-ghost w-full">Cancelar</button>
+      <button class="btn bg-[#153e75] hover:bg-black text-white w-full" (click)="onSubmit()">Guardar</button>
+    </div>
+  </div>
+</form>
+
+@if(organizationalInformationCreate()){
+<!-- Overlay de éxito -->
+<div class="fixed inset-0 z-50">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+  <div class="relative min-h-full grid place-items-center p-4">
+    <div role="alert" class="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+      <div class="h-1.5 bg-gradient-to-r from-[#153e75] via-black to-[#153e75]"></div>
+      <div class="p-6 sm:p-7">
+        <div class="mx-auto w-14 h-14 rounded-full grid place-items-center bg-[#153e75]/10 ring-4 ring-[#153e75]/10">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-[#153e75]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+            <circle cx="12" cy="12" r="9"></circle>
+          </svg>
+        </div>
+        <h3 class="mt-4 text-xl font-bold text-slate-900 text-center">¡Éxito!</h3>
+        <p class="mt-1 text-center text-slate-600">La información se ha guardado correctamente.</p>
+        <div class="mt-5 flex items-center justify-center gap-2">
+          <span class="badge bg-[#153e75]/10 text-[#153e75] border-[#153e75]/20">Organizacional</span>
+          <span class="badge bg-slate-100 text-slate-700 border-slate-200">Guardado</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+}

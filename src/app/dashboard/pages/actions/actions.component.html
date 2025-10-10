@@ -1,0 +1,408 @@
+<!-- Fase de Acción (GUIADA) -->
+<div class="min-h-screen bg-gradient-to-b from-white to-slate-50 text-slate-800" data-theme="light">
+  <div class="h-1 bg-gradient-to-r from-[#153e75] via-black to-[#153e75]"></div>
+
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200">
+    <div class="h-0.5 bg-gradient-to-r from-[#153e75] via-black to-[#153e75]"></div>
+    <div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-12 h-16 flex items-center justify-between">
+      <nav class="breadcrumbs text-xs sm:text-sm text-slate-500 truncate">
+        <ul>
+          <li routerLink="/"><a class="hover:text-black">Inicio</a></li>
+          <li routerLink="/dashboard"><a class="hover:text-black">AMEFs</a></li>
+          <li (click)="goToBack()"><a class="hover:text-black">Analysis</a></li>
+          <li class="text-slate-800 font-semibold">Acción</li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <div class="container mx-auto px-6 lg:px-10 py-6 grid grid-cols-12 gap-6">
+
+    <!-- LISTA -->
+    <aside class="col-span-12 md:col-span-3">
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-200 flex items-center gap-2">
+          <div class="relative flex-1 min-w-0">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="m21 21-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" />
+            </svg>
+            <input #q class="input input-sm input-bordered w-full pl-9 pr-2 bg-white text-slate-900 placeholder:text-slate-500
+                            border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+              placeholder="Buscar por texto o responsable…" (input)="setSearch(q.value)" />
+          </div>
+        </div>
+
+        <div class="max-h-[70vh] overflow-auto">
+          <!-- loading -->
+          <div class="p-4 animate-pulse space-y-2" [class.hidden]="actionsRes.status() !== 'loading'">
+            <div class="h-3 bg-slate-100 rounded"></div>
+            <div class="h-3 bg-slate-100 rounded w-2/3"></div>
+            <div class="h-3 bg-slate-100 rounded"></div>
+          </div>
+
+          <!-- lista -->
+          @for (a of listFiltered(); track a.id) {
+          <button class="relative w-full text-left p-3 sm:p-4 transition-all flex items-start gap-3
+                         border-b border-slate-100 hover:bg-slate-50" [ngClass]="selected() === a.id
+                    ? 'bg-gradient-to-r from-[#f5f9ff] to-white border-l-4 border-[#153e75] shadow-[0_8px_20px_-8px_rgba(21,62,117,0.25)]'
+                    : ''" (click)="select(a.id)">
+            <div class="flex-1 min-w-0">
+              <div class="font-medium truncate text-slate-900">{{ a.recommendedAction || '—' }}</div>
+              <div class="text-xs text-slate-500 truncate">{{ a.responsible || 'Sin responsable' }}</div>
+              <div class="mt-2 flex items-center gap-3">
+                <span class="text-[11px] text-slate-500">Target: {{ a.targetDate || '—' }}</span>
+              </div>
+            </div>
+
+            <div class="text-right">
+              <div class="text-[11px] text-slate-500">NPRʼ</div>
+              <span
+                class="badge border {{ nprColor((a.newSeverity && a.newOccurrence && a.newDetection) ? (a.newSeverity*a.newOccurrence*a.newDetection) : null) }}">
+                {{ (a.newSeverity && a.newOccurrence && a.newDetection) ? (a.newSeverity*a.newOccurrence*a.newDetection)
+                : '—' }}
+              </span>
+            </div>
+          </button>
+          }
+
+          <!-- vacío -->
+          <div class="p-6 text-slate-500"
+            [class.hidden]="!(listFiltered().length === 0 && actionsRes.status() !== 'loading')">
+            <div class="rounded-lg border border-dashed border-slate-300 p-4 text-sm">
+              Sin acciones. Crea una <b>nueva acción</b> o ajusta los filtros.
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- FORM -->
+    <main class="col-span-12 md:col-span-6">
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div class="h-1 bg-[#153e75] rounded-t-2xl"></div>
+
+        <div class="p-6 space-y-7" [formGroup]="form">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900">Acción</h3>
+              <p class="text-xs text-slate-500">
+                Prioriza eliminar <b>modo</b> o <b>causa</b>. Si no es viable, mejora <b>prevención/detección</b> para
+                disminuir O’ o D’.
+              </p>
+            </div>
+            <!-- Botón para abrir Guía -->
+            <label for="actions-guide-modal" class="btn btn-xs sm:btn-sm btn-outline">Guía</label>
+          </div>
+
+          <!-- recomendación/responsable/fecha -->
+          <div class="grid grid-cols-12 gap-6">
+            <label class="form-control flex flex-col gap-2 sm:gap-3 col-span-12">
+              <span class="label-text text-[13px] font-medium text-slate-700">Acción recomendada</span>
+              <div class="text-[11px] text-slate-500 -mt-1">
+                Describe <b>qué harás</b> para eliminar el modo/causa o mejorar el control. Ej.: “Sustituir fijación por
+                soldadura por puntos en subensamble X”.
+              </div>
+              <textarea autoResize rows="3" class="textarea textarea-bordered min-h-[96px] bg-white text-slate-900 placeholder:text-slate-500
+                       border-slate-300 leading-relaxed focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+                formControlName="recommendedAction"
+                placeholder="Ej.: Sustituir tornillos M6 por soldadura por puntos en subensamble X."></textarea>
+              <forms-error-label [control]="form.get('recommendedAction')!" />
+            </label>
+
+            <label class="form-control flex flex-col gap-2 sm:gap-3 col-span-12 md:col-span-6">
+              <span class="label-text text-[13px] font-medium text-slate-700">Responsable</span>
+              <div class="text-[11px] text-slate-500 -mt-1">Persona que ejecuta/coordina. Evita “equipo”.</div>
+              <input class="input input-bordered bg-white text-slate-900 placeholder:text-slate-500 border-slate-300
+                           focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20" formControlName="responsible"
+                placeholder="Nombre completo" />
+              <forms-error-label [control]="form.get('responsible')!" />
+            </label>
+
+            <label class="form-control flex flex-col gap-2 sm:gap-3 col-span-12 md:col-span-6">
+              <span class="label-text text-[13px] font-medium text-slate-700">Fecha target</span>
+              <div class="text-[11px] text-slate-500 -mt-1">Compromiso de cierre. Úsalo para priorizar.</div>
+              <input type="date" class="input input-bordered bg-white text-slate-900 border-slate-300
+                     focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20" formControlName="targetDate" />
+              <forms-error-label [control]="form.get('targetDate')!" />
+            </label>
+          </div>
+
+          <!-- implementación -->
+          <div class="grid grid-cols-12 gap-6">
+            <label class="form-control flex flex-col gap-2 sm:gap-3 col-span-12">
+              <span class="label-text text-[13px] font-medium text-slate-700">Acción implementada</span>
+              <div class="text-[11px] text-slate-500 -mt-1">
+                Rellénalo cuando esté hecho: método, materiales, lote, versión. Este campo + <b>Fecha de cierre</b>
+                permiten recalcular el NPR’.
+              </div>
+              <textarea autoResize rows="3" class="textarea textarea-bordered min-h-[96px] bg-white text-slate-900 placeholder:text-slate-500
+                        border-slate-300 leading-relaxed focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+                formControlName="implementedAction"
+                placeholder="Describe exactamente lo realizado (método, materiales, lote, versión)…"></textarea>
+              <forms-error-label [control]="form.get('implementedAction')!" />
+            </label>
+
+            <label class="form-control flex flex-col gap-2 sm:gap-3 col-span-12 md:col-span-6">
+              <span class="label-text text-[13px] font-medium text-slate-700">Fecha de cierre</span>
+              <div class="text-[11px] text-slate-500 -mt-1">Debe ser ≥ fecha target.</div>
+              <input type="date" class="input input-bordered bg-white text-slate-900 border-slate-300
+                     focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20" formControlName="completionDate" />
+              <span class="text-xs text-slate-500">No debe ser anterior a la fecha target.</span>
+              <forms-error-label [control]="form.get('completionDate')!" />
+            </label>
+          </div>
+
+          <!-- S'/O'/D' -->
+          <div class="grid grid-cols-12 gap-6">
+            <label class="form-control flex flex-col gap-1.5 sm:gap-2 col-span-12 sm:col-span-4">
+              <div class="flex items-center justify-between">
+                <span class="label-text text-[13px] font-medium text-slate-700">Severidad (S’ 1–10)</span>
+              </div>
+              <div class="text-[11px] text-slate-500 -mt-1">
+                Normalmente se mantiene. Baja solo si el <b>efecto</b> cambia sustancialmente (poco frecuente).
+              </div>
+              <input type="number" min="1" max="10" class="input input-bordered text-center font-mono bg-white text-slate-900 border-slate-300
+                     focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20" formControlName="newSeverity" />
+              <forms-error-label [control]="form.get('newSeverity')!" />
+            </label>
+
+            <label class="form-control flex flex-col gap-1.5 sm:gap-2 col-span-12 sm:col-span-4">
+              <div class="flex items-center justify-between">
+                <span class="label-text text-[13px] font-medium text-slate-700">Ocurrencia (O’ 1–10)</span>
+              </div>
+              <div class="text-[11px] text-slate-500 -mt-1">
+                Debe bajar si eliminaste la <b>causa</b> o pusiste prevención robusta.
+              </div>
+              <input type="number" min="1" max="10" class="input input-bordered text-center font-mono bg-white text-slate-900 border-slate-300
+                     focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20" formControlName="newOccurrence" />
+              <forms-error-label [control]="form.get('newOccurrence')!" />
+            </label>
+
+            <label class="form-control flex flex-col gap-1.5 sm:gap-2 col-span-12 sm:col-span-4">
+              <div class="flex items-center justify-between">
+                <span class="label-text text-[13px] font-medium text-slate-700">Detección (D’ 1–10)</span>
+              </div>
+              <div class="text-[11px] text-slate-500 -mt-1">
+                Baja cuando el <b>control</b> detecta mejor (automatización, poka-yoke, 100% prueba).
+              </div>
+              <input type="number" min="1" max="10" class="input input-bordered text-center font-mono bg-white text-slate-900 border-slate-300
+                     focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20" formControlName="newDetection" />
+              <forms-error-label [control]="form.get('newDetection')!" />
+            </label>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- RESUMEN -->
+    <aside class="col-span-12 md:col-span-3">
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div class="p-6 space-y-5" [formGroup]="form">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-xs uppercase tracking-wide text-slate-500">NPR</div>
+              <div class="mt-1 text-[11px] text-slate-500">Base: {{ nprBefore() ?? '—' }}</div>
+              <div class="mt-3">
+                <!-- Círculo NPR efectivo -->
+                <span class="inline-flex items-center justify-center w-16 h-16 rounded-full border-2" [ngClass]="{
+          'border-red-300 bg-red-50 text-red-700'          : (nprEffective() ?? 0) >= 200,
+          'border-amber-300 bg-amber-50 text-amber-700'    : (nprEffective() ?? 0) >= 100 && (nprEffective() ?? 0) < 200,
+          'border-emerald-300 bg-emerald-50 text-emerald-700': (nprEffective() ?? 0) > 0 && (nprEffective() ?? 0) < 100,
+          'border-slate-200 bg-slate-50 text-slate-500'    : !(nprEffective())
+        }">
+                  <span class="text-xl font-extrabold">{{ nprEffective() ?? '—' }}</span>
+                </span>
+
+                <!-- Mini-indicador de fuente -->
+                <div class="mt-1 flex items-center gap-2">
+                  @if (nprAfter()) {
+                  <span class="badge border border-emerald-200 bg-emerald-50 text-emerald-700">NPR’</span>
+                  <span class="text-[11px] text-slate-600">Usando <b>S′×O′×D′</b> (valores nuevos).</span>
+                  } @else {
+                  <span class="badge border border-slate-200 bg-slate-50 text-slate-700">Base</span>
+                  <span class="text-[11px] text-slate-600">Usando NPR base del análisis (<b>S×O×D</b>).</span>
+                  }
+                </div>
+              </div>
+
+            </div>
+
+            <div class="text-xs text-slate-500 max-w-[12rem]">
+              @if (nprBefore() && nprAfter() && nprAfter()! >= nprBefore()!) {
+              <div class="p-2 rounded bg-amber-50 text-amber-700 border border-amber-200">
+                La acción no reduce el riesgo. Revisa si apunta a <b>modo</b> o <b>causa</b>.
+              </div>
+              }
+            </div>
+          </div>
+
+          <div class="divider my-2"></div>
+
+          <div class="flex flex-col gap-2">
+            <button class="btn bg-[#153e75] hover:bg-black text-white" (click)="save()"
+              [disabled]="saving()">Guardar</button>
+            <button class="btn btn-outline border-slate-300 text-slate-800" (click)="newAction()">Nueva</button>
+            <button class="btn btn-outline border-red-200 text-red-700 hover:bg-red-600 hover:text-white"
+              (click)="delete()" [disabled]="!form.value.id">Eliminar</button>
+          </div>
+
+          <div class="divider my-2"></div>
+
+          <!-- Guía rápida -->
+          <details class="collapse collapse-arrow bg-slate-50 border border-slate-200 rounded-lg">
+            <summary class="collapse-title text-sm font-semibold">Guía rápida de acciones</summary>
+            <div class="collapse-content text-[12px] leading-5 space-y-2">
+              <ol class="list-decimal ml-4 space-y-1">
+                <li>Primero intenta <b>eliminar modo</b> o <b>causa</b>.</li>
+                <li>Si no es viable, mejora <b>prevención/detección</b> (bajar O’ o D’).</li>
+                <li>Completa <b>Implementada</b> + <b>Fecha de cierre</b> cuando esté hecho.</li>
+                <li>Valora S′/O′/D′ con la misma escala del análisis.</li>
+              </ol>
+              <div class="grid grid-cols-3 gap-2">
+                <div class="p-2 rounded bg-white border">
+                  <div class="font-semibold text-slate-700">S′ (Severidad)</div>
+                  <div>9–10 peligro/ norma · 7–8 muy insatisfecho · 5–6 degradación · 3–4 leve · 1–2 mínimo.</div>
+                </div>
+                <div class="p-2 rounded bg-white border">
+                  <div class="font-semibold text-slate-700">O′ (Ocurrencia)</div>
+                  <div>9–10 casi inevitable · 7–8 repetidos · 5–6 ocasionales · 3–4 pocos · 1–2 remotos.</div>
+                </div>
+                <div class="p-2 rounded bg-white border">
+                  <div class="font-semibold text-slate-700">D′ (Detección)</div>
+                  <div>9–10 sin método/no detecta · 7–8 alta no-detección · 5–6 moderada · 3–4 baja · 1–2 detecta casi
+                    seguro.</div>
+                </div>
+              </div>
+              <div class="p-2 rounded bg-white border">
+                <div class="font-semibold text-slate-700 mb-1">Checklist antes de guardar</div>
+                <ul class="list-disc ml-4 space-y-1">
+                  <li>Acción clara y verificable (qué/cómo/dónde/cuándo).</li>
+                  <li>Responsable y fecha target definidos.</li>
+                  <li>Si está hecha: <b>Implementada</b> + <b>Fecha de cierre</b>.</li>
+                  <li>S′/O′/D′ coherentes con la escala.</li>
+                </ul>
+              </div>
+            </div>
+          </details>
+
+          <div class="text-[12px] text-slate-600 space-y-1 mt-2">
+            <div class="font-semibold">Reglas:</div>
+            <div>1) Elimina el <b>modo de fallo</b> si es posible.</div>
+            <div>2) Si no, elimina la <b>causa</b>.</div>
+            <div>3) Si no, mejora <b>prevención/detección</b> y reduce <b>O’</b> o <b>D’</b>.</div>
+            <div>4) Recalcula S′/O′/D′ con la <b>misma escala</b> acordada por el equipo.</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Toast -->
+  <div class="fixed bottom-4 right-4 z-50" [class.hidden]="!toast()">
+    <div
+      class="flex items-center gap-3 rounded-xl px-4 py-3 text-white shadow-lg ring-1 ring-black/5 transition-all duration-300"
+      [ngClass]="{
+           'bg-emerald-600': toast()?.kind === 'success',
+           'bg-sky-600':     toast()?.kind === 'update',
+           'bg-rose-600':    toast()?.kind === 'delete',
+           'bg-red-600':     toast()?.kind === 'error'
+         }" role="status" aria-live="polite">
+      @if (toast()?.kind !== 'delete' && toast()?.kind !== 'error') {
+      <svg class="w-5 h-5 opacity-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+      </svg>
+      }
+      @if (toast()?.kind === 'delete') {
+      <svg class="w-5 h-5 opacity-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+      }
+      @if (toast()?.kind === 'error') {
+      <svg class="w-5 h-5 opacity-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+      </svg>
+      }
+      <span class="text-sm font-medium truncate max-w-[56ch]">{{ toast()?.text }}</span>
+      <button type="button" class="ml-1 -mr-1 rounded-md/80 bg-white/10 hover:bg-white/20 px-1.5 py-1 text-xs"
+        aria-label="Cerrar notificación" (click)="closeToast()">✕</button>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: Guía completa de Acciones ============ -->
+  <input type="checkbox" id="actions-guide-modal" class="modal-toggle" />
+  <div class="modal">
+    <div class="modal-box max-w-4xl">
+      <div class="flex items-start justify-between mb-3">
+        <h3 class="font-bold text-lg">Guía para definir y cerrar Acciones</h3>
+        <label for="actions-guide-modal" class="btn btn-sm btn-ghost">✕</label>
+      </div>
+
+      <ol class="list-decimal ml-5 space-y-2 text-sm">
+        <li><b>Define la acción:</b> eliminar modo/causa; si no, mejorar control (prevención/detección).</li>
+        <li><b>Asigna responsable</b> y <b>fecha target</b> realista.</li>
+        <li><b>Implementa</b> y documenta (método, materiales, lote, versión).</li>
+        <li><b>Cierra</b> con fecha y recalcula <b>S′/O′/D′</b> (misma escala del análisis) para obtener el <b>NPR’</b>.
+        </li>
+        <li>Si <b>NPR’ ≥ NPR base</b>, re-plantea la acción (no reduce el riesgo).</li>
+      </ol>
+
+      <div class="grid md:grid-cols-3 gap-3 mt-4 text-sm">
+        <div class="rounded-lg border p-3">
+          <div class="font-semibold">Severidad S′</div>
+          <ul class="mt-1 space-y-0.5">
+            <li><b>9–10</b> Peligro / incumple regulaciones</li>
+            <li><b>7–8</b> Muy insatisfecho / inoperable seguro</li>
+            <li><b>5–6</b> Degradación / pérdida parcial</li>
+            <li><b>3–4</b> Leve</li>
+            <li><b>1–2</b> Mínimo</li>
+          </ul>
+        </div>
+        <div class="rounded-lg border p-3">
+          <div class="font-semibold">Ocurrencia O′</div>
+          <ul class="mt-1 space-y-0.5">
+            <li><b>9–10</b> Casi inevitable</li>
+            <li><b>7–8</b> Fallos repetidos</li>
+            <li><b>5–6</b> Ocasionales</li>
+            <li><b>3–4</b> Pocos</li>
+            <li><b>1–2</b> Remotos</li>
+          </ul>
+        </div>
+        <div class="rounded-lg border p-3">
+          <div class="font-semibold">Detección D′</div>
+          <ul class="mt-1 space-y-0.5">
+            <li><b>9–10</b> Sin método/ no detecta</li>
+            <li><b>7–8</b> Alta prob. de no detección</li>
+            <li><b>5–6</b> Moderada</li>
+            <li><b>3–4</b> Baja</li>
+            <li><b>1–2</b> Detecta casi seguro</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Ejemplo -->
+      <div class="mt-4 grid md:grid-cols-2 gap-3 text-sm">
+        <div class="rounded-lg border p-3 bg-slate-50">
+          <div class="font-semibold mb-1">Ejemplo</div>
+          <div><b>Recomendada:</b> Añadir poka-yoke de montaje del conector.</div>
+          <div><b>Implementada:</b> Se instala guía 3D impresa, error-proof (v2, lote 24-10).</div>
+          <div><b>S′/O′/D′:</b> 8 / 2 / 3 → <b>NPR’ 48</b> (desde 96).</div>
+        </div>
+        <div class="rounded-lg border p-3">
+          <div class="font-semibold mb-1">Checklist de cierre</div>
+          <ul class="list-disc ml-4 space-y-1">
+            <li>Acción verificable (evidencia disponible).</li>
+            <li>Fecha de cierre ≥ target.</li>
+            <li>S′/O′/D′ evaluados con la misma escala.</li>
+            <li>NPR’ &lt; NPR base o justificación si no.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal-action">
+        <label for="actions-guide-modal" class="btn">Entendido</label>
+      </div>
+    </div>
+    <label class="modal-backdrop" for="actions-guide-modal"></label>
+  </div>
+</div>

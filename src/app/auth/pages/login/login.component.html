@@ -1,0 +1,81 @@
+<div class="min-h-screen grid lg:grid-cols-2 font-sans">
+
+  <div
+    class="relative hidden lg:flex flex-col items-center justify-center bg-gradient-to-br from-cyan-400 to-sky-600 text-white p-12 overflow-hidden">
+
+    <div class="absolute inset-0">
+      <div class="absolute -bottom-24 -left-24 w-72 h-72 bg-white/20 rounded-full filter blur-xl"></div>
+      <div class="absolute -top-12 -right-12 w-96 h-96 bg-white/10 rounded-full filter blur-2xl"></div>
+      <svg class="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+        <path fill="none" stroke="currentColor" stroke-width="2" d="M-100 500 C 200 200, 800 800, 1100 500" />
+        <path fill="none" stroke="currentColor" stroke-width="1.5" d="M-100 600 C 300 1000, 700 0, 1100 400" />
+      </svg>
+    </div>
+
+    <div class="z-10 text-center max-w-md" style="text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+      <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4 animate-fade-in-down">
+        Sistema AMEF Automotriz
+      </h1>
+      <p class="text-lg opacity-90 leading-relaxed animate-fade-in-up">
+        Gestión profesional para el Análisis de Modo y Efecto de Falla. Potencia la calidad y seguridad en tus procesos.
+      </p>
+    </div>
+  </div>
+
+  <div class="relative flex items-center justify-center p-8 bg-slate-100 bg-cover">
+    <div class="absolute inset-0 bg-slate-100/30"></div>
+    <div class="w-full max-w-md z-10">
+
+      <div class="text-center mb-8">
+        <div class="inline-block p-1.5 bg-gradient-to-br from-white/80 to-white/50 rounded-full shadow-lg">
+          <div
+            class="w-20 h-20 rounded-full bg-gradient-to-br from-sky-400 to-cyan-500 flex items-center justify-center shadow-inner shadow-black/10">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white drop-shadow-lg" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+        </div>
+        <h2 class="text-3xl font-bold text-gray-800 mt-4" style="text-shadow: 0 1px 2px #FFF;">Bienvenido</h2>
+        <p class="text-gray-600 mt-1">Ingresa para continuar</p>
+      </div>
+
+      <div class="bg-white/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/30">
+        <div class="p-8">
+          <form [formGroup]="login" (ngSubmit)="onSubmit()">
+            <div class="space-y-5">
+
+              <div class="relative">
+                <input type="email" placeholder="Correo Electrónico"
+                  class="input w-full pl-4 bg-white/70 border-gray-300/80 placeholder-gray-500 text-gray-800 focus:border-cyan-400 focus:ring focus:ring-cyan-300 focus:ring-opacity-50"
+                  formControlName="email" required />
+              </div>
+
+              <div class="relative">
+                <input type="password" placeholder="Contraseña"
+                  class="input w-full pl-4 bg-white/70 border-gray-300/80 placeholder-gray-500 text-gray-800 focus:border-cyan-400 focus:ring focus:ring-cyan-300 focus:ring-opacity-50"
+                  formControlName="password" required />
+              </div>
+
+
+              <div class="pt-2">
+                <button type="submit" class="w-full text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all duration-200 ease-in-out
+                                            bg-gradient-to-b from-sky-400 to-blue-600
+                                            border border-blue-700/80 border-t-sky-300/80
+                                            hover:from-sky-500 hover:to-blue-700
+                                            active:from-sky-600 active:to-blue-800 active:shadow-inner"
+                  style="text-shadow: 0 -1px 1px rgba(0,0,0,0.2);">
+                  Ingresar al Sistema
+                </button>
+              </div>
+
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

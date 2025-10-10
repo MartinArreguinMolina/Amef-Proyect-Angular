@@ -1,0 +1,339 @@
+<!-- Home: Sistema AMEF Automotriz (Corporate Navy/White) -->
+<div class="min-h-screen bg-base-100" data-theme="light">
+  <!-- usuario -->
+  <div class="container mx-auto px-6 lg:px-12 py-2 text-sm text-base-content/60">
+    {{authService.user()?.fullName | titlecase}}
+  </div>
+
+  <!-- NAVBAR corporativo -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-base-200">
+    <div class="container mx-auto px-6 lg:px-12 h-16 flex items-center justify-between">
+      <a class="inline-flex items-center gap-2 font-bold text-lg">
+        <!-- logotipo -->
+        <span
+          class="inline-grid place-items-center w-9 h-9 rounded-lg bg-gradient-to-br from-[#153e75] to-[#0f2e58] text-white shadow-sm">
+          <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M3 12h3m12 0h3M12 3v3m0 12v3" />
+            <circle cx="12" cy="12" r="4" />
+          </svg>
+        </span>
+        <span class="tracking-tight">AMEF Automotriz</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-6 text-sm">
+        <a href="#inicio" class="link link-hover hover:text-[#0f2e58]">Inicio</a>
+        <a href="#modulos" class="link link-hover hover:text-[#0f2e58]">Módulos</a>
+        <a href="#flujo" class="link link-hover hover:text-[#0f2e58]">Flujo AMEF</a>
+        <a href="#contacto" class="link link-hover hover:text-[#0f2e58]">Contacto</a>
+      </nav>
+      @if(authService.authStatus() === 'not-authenticated'){
+        <button type="button" routerLink="/auth/login" class="btn btn-sm bg-[#153e75] text-white hover:bg-black">
+          Iniciar sesión
+        </button>
+      }
+
+      @if(authService.authStatus() === 'authenticated'){
+        <button type="button" routerLink="/auth/login" class="btn bg-warning" (click)="authService.logout()">
+          Cerrar sesión
+        </button>
+      }
+    </div>
+  </header>
+
+  <!-- HERO corporativo con blueprint sutil -->
+  <section id="inicio" class="relative overflow-hidden">
+    <!-- Fondo: gradiente + grid + halo navy -->
+    <div class="absolute inset-0 -z-10">
+      <div class="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-slate-100"></div>
+
+      <!-- grid -->
+      <svg
+        class="absolute inset-0 w-full h-full opacity-50 [mask-image:linear-gradient(to_bottom,rgba(0,0,0,.9),transparent_85%)]"
+        aria-hidden="true">
+        <defs>
+          <pattern id="grid-32" width="32" height="32" patternUnits="userSpaceOnUse">
+            <path d="M 32 0 L 0 0 0 32" class="stroke-slate-300/40" stroke-width="0.75" fill="none"></path>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid-32)"></rect>
+      </svg>
+
+      <!-- halo navy -->
+      <div class="absolute -top-28 left-1/2 -translate-x-1/2 w-[72rem] h-[72rem] rounded-full blur-3xl opacity-35"
+        style="background: radial-gradient(closest-side, rgba(21,62,117,.22), transparent 70%);"></div>
+
+      <!-- acentos -->
+      <div class="absolute -right-24 -top-24 w-72 h-72 bg-[#153e75]/20 rounded-full blur-2xl"></div>
+      <div class="absolute -left-24 bottom-0 w-80 h-80 bg-slate-300/30 rounded-full blur-2xl"></div>
+    </div>
+
+    <div class="container mx-auto px-6 lg:px-12">
+      <div class="hero min-h-[64vh]">
+        <div class="hero-content text-center">
+          <div class="max-w-4xl">
+            <!-- chip superior -->
+            <div
+              class="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200 bg-white/70 backdrop-blur">
+              <span class="w-2 h-2 rounded-full bg-[#0f2e58]"></span>
+              <span class="text-sm text-[#0f2e58] font-medium">Plataforma AMEF • Calidad Automotriz</span>
+            </div>
+
+            <h1 class="text-4xl md:text-6xl font-extrabold leading-tight">
+              <span class="text-[#0f2e58]">Sistema AMEF</span> <span class="text-black">Automotriz</span>
+            </h1>
+            <p class="mt-6 text-lg md:text-xl text-base-content/70">
+              Gestión profesional para el Análisis de Modo y Efecto de Falla.<br />
+              <span class="text-base-content">Potencia la calidad y seguridad en tus procesos.</span>
+            </p>
+
+            <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a routerLink="dashboard" class="btn btn-wide bg-[#153e75] text-white hover:bg-black shadow-sm">Comenzar ahora</a>
+              <a class="btn btn-outline border-[#153e75] text-[#153e75] hover:bg-[#153e75] hover:text-white">Ver
+                documentación</a>
+            </div>
+
+            <!-- KPIs -->
+            <div class="mt-12">
+              <div class="stats bg-white/85 backdrop-blur border border-base-200/80 shadow-sm">
+                <div class="stat">
+                  <div class="stat-title">Procesos analizados</div>
+                  <div class="stat-value text-[#0f2e58]">+1,200</div>
+                  <div class="stat-desc text-base-content/60">Últimos 12 meses</div>
+                </div>
+                <div class="stat">
+                  <div class="stat-title">Reducción de defectos</div>
+                  <div class="stat-value text-[#0f2e58]">-38%</div>
+                  <div class="stat-desc text-base-content/60">Casos de estudio</div>
+                </div>
+                <div class="stat">
+                  <div class="stat-title">Tiempo de ciclo</div>
+                  <div class="stat-value text-[#0f2e58]">-27%</div>
+                  <div class="stat-desc text-base-content/60">Mejora de flujo</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- badges -->
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-base-content/60">
+              <span class="badge badge-ghost border-base-300">Alineado a estándares automotrices</span>
+              <span class="badge badge-ghost border-base-300">Trazabilidad y auditoría</span>
+              <span class="badge badge-ghost border-base-300">Exportables PDF/Excel</span>
+              <span class="badge badge-ghost border-base-300">Seguridad por roles</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Franja de marcas -->
+  <section class="py-6 border-y border-base-200 bg-white/80">
+    <div class="container mx-auto px-6 lg:px-12">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 items-center gap-6 opacity-80">
+        <div class="h-8 bg-base-200 rounded"></div>
+        <div class="h-8 bg-base-200 rounded"></div>
+        <div class="h-8 bg-base-200 rounded"></div>
+        <div class="h-8 bg-base-200 rounded"></div>
+        <div class="h-8 bg-base-200 rounded"></div>
+        <div class="h-8 bg-base-200 rounded"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURE GRID -->
+  <section id="modulos" class="py-16 md:py-20 container mx-auto px-6 lg:px-12">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl md:text-4xl font-bold">
+        <span class="text-[#0f2e58]">Módulos</span> clave
+      </h2>
+      <p class="mt-3 text-base-content/70">Todo lo necesario para ejecutar AMEF de principio a fin, con enfoque
+        industrial.</p>
+    </div>
+
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <!-- Card helper -->
+      <div class="card bg-base-100 border border-base-200 hover:shadow-md transition group">
+        <div class="card-body">
+          <div class="flex items-center gap-3">
+            <div class="rounded-lg p-2 bg-[#153e75]/10 text-[#153e75] ring-1 ring-[#153e75]/20">
+              <!-- engrane -->
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
+                <path
+                  d="M19.4 15a7.8 7.8 0 0 0 .1-2l2.1-1.6-2-3.5-2.5.6a7.9 7.9 0 0 0-1.7-1l-.4-2.6H11l-.4 2.6c-.6.2-1.1.5-1.7 1l-2.5-.6-2 3.5 2.1 1.6a7.8 7.8 0 0 0 .1 2l-2.2 1.6 2 3.5 2.5-.6c.5.4 1.1.7 1.7 1l.4 2.6h4l.4-2.6c.6-.2 1.2-.6 1.7-1l2.5.6 2-3.5L19.4 15Z" />
+              </svg>
+            </div>
+            <h3 class="card-title">Definición de proceso</h3>
+          </div>
+          <p class="text-base-content/70">Mapa de procesos, entradas/salidas y versionado con permisos.</p>
+          <div class="mt-3 flex gap-2">
+            <span class="badge badge-ghost">Estandarización</span>
+            <span class="badge badge-ghost">Permisos</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 border border-base-200 hover:shadow-md transition group">
+        <div class="card-body">
+          <div class="flex items-center gap-3">
+            <div class="rounded-lg p-2 bg-[#153e75]/10 text-[#153e75] ring-1 ring-[#153e75]/20">
+              <!-- clipboard-check -->
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="m9 12 2 2 4-4" />
+                <rect x="4" y="4" width="16" height="16" rx="2" />
+              </svg>
+            </div>
+            <h3 class="card-title">Modos de falla</h3>
+          </div>
+          <p class="text-base-content/70">Causas, efectos y controles existentes con trazabilidad completa.</p>
+          <div class="mt-3 flex gap-2">
+            <span class="badge badge-ghost">Historial</span>
+            <span class="badge badge-ghost">Colaboración</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 border border-base-200 hover:shadow-md transition group">
+        <div class="card-body">
+          <div class="flex items-center gap-3">
+            <div class="rounded-lg p-2 bg-[#153e75]/10 text-[#153e75] ring-1 ring-[#153e75]/20">
+              <!-- chart -->
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M3 3v18h18" />
+                <rect x="7" y="8" width="3" height="7" rx="1" />
+                <rect x="12" y="5" width="3" height="10" rx="1" />
+                <rect x="17" y="11" width="3" height="4" rx="1" />
+              </svg>
+            </div>
+            <h3 class="card-title">Evaluación S-O-D</h3>
+          </div>
+          <p class="text-base-content/70">Cálculo NPR, reglas configurables y priorización de riesgos.</p>
+          <div class="mt-3 flex gap-2">
+            <span class="badge badge-ghost">NPR</span>
+            <span class="badge badge-ghost">Matrices</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 border border-base-200 hover:shadow-md transition group">
+        <div class="card-body">
+          <div class="flex items-center gap-3">
+            <div class="rounded-lg p-2 bg-[#153e75]/10 text-[#153e75] ring-1 ring-[#153e75]/20">
+              <!-- shield -->
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+              </svg>
+            </div>
+            <h3 class="card-title">Acciones y responsables</h3>
+          </div>
+          <p class="text-base-content/70">Asignación, fechas objetivo y seguimiento de cierre.</p>
+          <div class="mt-3 flex gap-2">
+            <span class="badge badge-ghost">Ownership</span>
+            <span class="badge badge-ghost">Alertas</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 border border-base-200 hover:shadow-md transition group">
+        <div class="card-body">
+          <div class="flex items-center gap-3">
+            <div class="rounded-lg p-2 bg-[#153e75]/10 text-[#153e75] ring-1 ring-[#153e75]/20">
+              <!-- file -->
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                <path d="M14 2v6h6" />
+              </svg>
+            </div>
+            <h3 class="card-title">Reportes y auditoría</h3>
+          </div>
+          <p class="text-base-content/70">Reportes PDF/Excel, bitácora de cambios y evidencias.</p>
+          <div class="mt-3 flex gap-2">
+            <span class="badge badge-ghost">Export</span>
+            <span class="badge badge-ghost">Auditable</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 border border-base-200 hover:shadow-md transition group">
+        <div class="card-body">
+          <div class="flex items-center gap-3">
+            <div class="rounded-lg p-2 bg-[#153e75]/10 text-[#153e75] ring-1 ring-[#153e75]/20">
+              <!-- api -->
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M4 12h16M12 4v16" />
+                <circle cx="4" cy="12" r="2" />
+                <circle cx="20" cy="12" r="2" />
+                <circle cx="12" cy="4" r="2" />
+                <circle cx="12" cy="20" r="2" />
+              </svg>
+            </div>
+            <h3 class="card-title">Integraciones</h3>
+          </div>
+          <p class="text-base-content/70">Conecta con QA, MES, ERP o APIs internas.</p>
+          <div class="mt-3 flex gap-2">
+            <span class="badge badge-ghost">REST</span>
+            <span class="badge badge-ghost">Webhooks</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FLUJO AMEF -->
+  <section id="flujo" class="py-16 bg-base-200/60">
+    <div class="container mx-auto px-6 lg:px-12">
+      <div class="text-center mb-10">
+        <h2 class="text-3xl md:text-4xl font-bold"><span class="text-[#0f2e58]">Flujo</span> de trabajo AMEF</h2>
+        <p class="mt-3 text-base-content/70">Cuatro pasos para elevar la confiabilidad de tus procesos.</p>
+      </div>
+
+      <ul class="steps steps-vertical lg:steps-horizontal w-full">
+        <li class="step step-primary">Definir proceso</li>
+        <li class="step step-primary">Identificar modos de falla</li>
+        <li class="step step-primary">Evaluar S-O-D & NPR</li>
+        <li class="step">Plan de acciones & verificación</li>
+      </ul>
+
+      <div class="mt-10 grid lg:grid-cols-2 gap-6 items-center">
+        <div class="mockup-window border border-base-300 bg-base-200">
+          <div class="bg-base-100 px-6 py-8">
+            <div class="grid grid-cols-3 gap-3">
+              <div class="skeleton h-24"></div>
+              <div class="skeleton h-24"></div>
+              <div class="skeleton h-24"></div>
+              <div class="skeleton h-24 col-span-2"></div>
+              <div class="skeleton h-24"></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-2xl font-semibold text-base-content">Visibilidad y control total</h3>
+          <p class="mt-3 text-base-content/70">
+            Prioriza por NPR, mide impacto de acciones y monitorea avance con paneles claros.
+          </p>
+          <div class="mt-6 flex gap-3">
+            <a class="btn bg-[#153e75] text-white hover:bg-black">Explorar demo</a>
+            <a class="btn btn-outline border-[#153e75] text-[#153e75] hover:bg-[#153e75] hover:text-white">Solicitar
+              tour</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA final -->
+  <section id="contacto" class="py-16">
+    <div class="container mx-auto px-6 lg:px-12">
+      <div class="card bg-gradient-to-br from-[#153e75] to-[#0f2e58] text-primary-content shadow-xl">
+        <div class="card-body items-center text-center">
+          <h2 class="card-title text-3xl md:text-4xl">Estandariza tu AMEF y reduce riesgos</h2>
+          <p class="opacity-90">Implementación consistente, auditorías claras y decisiones basadas en datos.</p>
+          <div class="card-actions mt-4">
+            <a class="btn bg-white text-[#0f2e58] hover:bg-slate-100">Crear cuenta</a>
+            <a class="btn btn-outline text-primary-content border-primary-content hover:bg-white/10">Hablar con
+              ventas</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
