@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { environments } from '@env/environmets';
 import { Login, UserReponse } from '@interfaces/interfaces';
-import { catchError, map, of } from 'rxjs';
+import { catchError, delay, map, of } from 'rxjs';
 import { Router } from '@angular/router';
 
 type AuthStatus = 'checking' | 'authenticated' | 'not-authenticated';
@@ -83,5 +83,12 @@ export class AuthService {
     localStorage.setItem('token', token)
 
     return true;
+  }
+
+
+  getUserTerm(term: string){
+    return this.http.get<UserReponse[]>(`${this.baseUrl}/auth/users/${term}`).pipe(
+      delay(300)
+    )
   }
 }

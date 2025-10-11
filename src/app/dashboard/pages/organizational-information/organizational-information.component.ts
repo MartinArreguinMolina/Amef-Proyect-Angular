@@ -1,64 +1,89 @@
-import { JsonPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, of, single } from 'rxjs';
 import { AuthService } from 'src/app/auth/service/auth-service.service';
 import { AmefService } from '../services/amef.service';
 import { FormsErrorLabelComponent } from "src/app/shared/forms-error-label/forms-error-label.component";
 import { Router, RouterLink } from '@angular/router';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-organizational-information',
-  imports: [ReactiveFormsModule, FormsErrorLabelComponent, RouterLink],
+  imports: [ReactiveFormsModule, FormsErrorLabelComponent, RouterLink, TitleCasePipe],
   templateUrl: './organizational-information.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OrganizationalInformationComponent {
   private fbuilder = inject(FormBuilder);
   authService = inject(AuthService);
-  amefService = inject(AmefService)
+  amefService = inject(AmefService);
   router = inject(Router)
+  usersSignal = signal<string[]>([]);
+  usersArrayEmpty = signal<boolean>(false);
 
   organizationalInformationCreate = signal<boolean>(false)
 
+  userFilter = signal<string | null>('')
 
-  // Form conectado al HTML
   fb = this.fbuilder.group({
-
-    // Team como CSV por ahora (luego puedes mapearlo a string[] en el submit)
-    team: ['', [Validators.required, Validators.minLength(1)]],
-
-    // Identificación
+    team: [''],
     proyectCode: ['', [Validators.required]],
     leadingDepartment: ['', [Validators.required, Validators.minLength(1)]],
     system: [null, Validators.required],
     subsystem: [null, Validators.required],
     component: [null, Validators.required],
-
-    // Fechas
     dateOfOrigin: ['', [Validators.required]],
     targetDate: ['', [Validators.required]],
   });
 
+  changeUserFilter(term: string) {
+    if (!term) {
+      this.userFilter.set(null)
+      return;
+    };
+    this.userFilter.set(term);
+
+
+    console.log(this.users.value())
+  }
+
+
+  users = rxResource({
+    params: () => this.userFilter(),
+    stream: ({ params }) => {
+      if (!params) return of([])
+      return this.authService.getUserTerm(params);
+    }
+  })
+
+  addUser(user: string) {
+   if(this.usersSignal().includes(user)) return;
+    this.usersSignal.update((r) => [...r, user])
+  }
+
+  deleteUser(user: string) {
+    this.usersSignal.update((r) => {
+      const users = r.filter((currentUser) => currentUser !== user);
+      return users
+    })
+  }
 
   async onSubmit() {
-
-    if (this.fb.invalid) {
+    if (this.fb.invalid || this.usersSignal().length <= 0) {
+      this.usersArrayEmpty.set(true)
       this.fb.markAllAsTouched();
+      setTimeout(() => {
+        this.usersArrayEmpty.set(false)
+      }, 4000)
       return;
     }
-
-    // Mapeo opcional: team CSV -> string[]
     const raw = this.fb.value;
-    const teamArray = (raw.team ?? '')
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
+    const teamArray = this.usersSignal()
 
     const payload = {
       ...raw,
       team: teamArray,
-      // Asegurar ISO strings si usas <input type="date">
       dateOfOrigin: raw.dateOfOrigin,
       targetDate: raw.targetDate,
       preparedById: this.authService.user()?.id
@@ -71,9 +96,9 @@ export class OrganizationalInformationComponent {
 
       setTimeout(() => {
         this.organizationalInformationCreate.set(false);
-      }, 1500);
+        this.router.navigate(['dashboard/amef', res.amefId, 'analysis']);
+      }, 3000);
 
-      this.router.navigate(['dashboard/amef', res.amefId, 'analysis']);
 
 
       this.fb.reset()

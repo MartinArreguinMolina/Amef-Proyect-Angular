@@ -7,12 +7,13 @@ import {
 import {
   FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators
 } from '@angular/forms';
-import { ActivatedRoute, RouterEvent, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { of, Observable } from 'rxjs';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 
 import { AmefService, ActionItem, ActionCreateDto } from '../services/amef.service';
 import { FormsErrorLabelComponent } from 'src/app/shared/forms-error-label/forms-error-label.component';
+import { AuthService } from 'src/app/auth/service/auth-service.service';
 
 /* Auto-resize */
 @Directive({ selector: 'textarea[autoResize]', standalone: true })
@@ -57,10 +58,35 @@ export class ActionsComponent implements OnInit {
   private api = inject(AmefService);
   private fb = inject(FormBuilder);
 
+  authService = inject(AuthService)
+
+  termSearch = signal<string>('')
+
   constructor(private location: Location){}
 
   goToBack(){
     this.location.back()
+  }
+
+  changeSearch(term: string){
+    if(!term){
+      this.termSearch.set('')
+      return;
+    }
+
+    this.termSearch.set(term)
+  }
+
+  users = rxResource({
+    params: () => {
+      return ({term: this.termSearch()})
+    },
+    stream: ({params}) => this.authService.getUserTerm(params.term)
+  })
+
+  addUser(user: string){
+    this.form.patchValue({responsible: user})
+    this.termSearch.set('');
   }
 
   amefId = signal<string>('');

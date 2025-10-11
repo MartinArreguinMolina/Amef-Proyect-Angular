@@ -13,8 +13,7 @@
       </nav>
       <div class="hidden md:flex items-center gap-2">
         <button type="button" class="btn btn-ghost btn-sm text-slate-800 hover:bg-slate-100">Cancelar</button>
-        <button class="btn btn-sm bg-[#153e75] hover:bg-black text-white shadow-sm"
-          (click)="onSubmit()">Guardar</button>
+        <button class="btn btn-sm bg-[#153e75] hover:bg-black text-white shadow-sm" (click)="onSubmit()">Guardar</button>
       </div>
       <div class="md:hidden flex items-center gap-2">
         <button type="button" class="btn btn-ghost btn-sm">Cancelar</button>
@@ -62,24 +61,79 @@
                 <legend class="text-base sm:text-lg font-semibold text-[#153e75] flex items-center gap-2">
                   <span class="inline-grid place-items-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#e6eef8] text-[#153e75]">1</span>
                   Equipo responsable <span class="text-red-500">*</span>
-                  <span class="tooltip tooltip-right" data-tip="Incluye funciones clave: Calidad, Proceso/Producción, Diseño/Producto, Proveedores y Mantenimiento. Escribe varios separados por coma.">
+                  <span class="tooltip tooltip-right"
+                    data-tip="Incluye funciones clave: Calidad, Proceso/Producción, Diseño/Producto, Proveedores y Mantenimiento. Escribe varios separados por coma.">
                     <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 16v-4" />
+                      <path d="M12 8h.01" />
                     </svg>
                   </span>
                 </legend>
 
                 <div class="rounded-xl border-2 border-dashed border-slate-300/90 bg-slate-50 p-3 sm:p-4">
                   <div class="join w-full flex flex-col sm:flex-row">
-                    <input formControlName="team"
+                    <input
+                      (input)="changeUserFilter(userFilter.value)"
+                      formControlName="team"
                       class="input input-bordered join-item w-full border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
-                      placeholder="Calidad, Producción, Ingeniería de Producto…" />
-                    <button type="button"
-                      class="btn join-item bg-[#153e75] hover:bg-black text-white w-full sm:w-auto mt-2 sm:mt-0 shadow-sm">
-                      Agregar
-                    </button>
+                      placeholder="Buscar por nombre o correo electronico"
+                      #userFilter
+                    />
                   </div>
-                  <p class="text-xs text-slate-500 mt-2">Sugerencia: usa coma para listar varias áreas/personas.</p>
+
+                  <!-- Aviso inline sutil (visible solo si está vacío el array) -->
+                  @if (usersArrayEmpty()) {
+                    <p class="mt-2 text-xs rounded-lg border border-amber-200 bg-amber-50/70 text-amber-900 px-3 py-2 flex items-start gap-2">
+                      <svg class="w-4 h-4 mt-0.5 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 8h.01M12 12v4"></path>
+                      </svg>
+                      Agrega al menos una persona al equipo.
+                    </p>
+                  }
+
+                  <!-- Lista de sugerencias -->
+                  @if (this.users.hasValue() && this.users.value()!.length > 0) {
+                    <ul class="w-96 h-36 overflow-y-auto z-10 rounded-xl bg-base-100 shadow-md border border-slate-200 p-1">
+                      @for (user of this.users.value(); track $index) {
+                        <li class="my-0.5">
+                          <a
+                            (click)="addUser(user.fullName)"
+                            class="block w-full px-3 py-2 rounded-lg transition hover:bg-base-200/70 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 active:scale-[.99]"
+                            title="{{ user.fullName }}"
+                          >
+                            <span class="inline-flex items-center gap-2">
+                              <span class="i-lucide-user w-4 h-4 opacity-70"></span>
+                              <span class="font-medium truncate">{{ user.fullName | titlecase}}</span>
+                            </span>
+                          </a>
+                        </li>
+                      }
+                    </ul>
+                  }
+
+                  <!-- Chips de seleccionados -->
+                  @if (this.usersSignal()!.length) {
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      @for (user of this.usersSignal(); track $index) {
+                        <span class="badge badge-outline bg-slate-50 text-slate-800 border-slate-200 gap-1">
+                          {{ user | titlecase}}
+                          <button
+                            type="button"
+                            (click)="deleteUser(user)"
+                            class="btn btn-ghost btn-xs px-1 text-slate-600 hover:bg-slate-100"
+                            aria-label="Quitar {{ user }}"
+                            title="Quitar {{ user }}"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      }
+                    </div>
+                  }
+
+                  <p class="text-xs text-slate-500 mt-3">Sugerencia: usa coma para listar varias áreas/personas.</p>
                 </div>
                 <forms-error-label [control]="fb.get('team')!" />
               </fieldset>
@@ -89,9 +143,12 @@
                 <legend class="text-base sm:text-lg font-semibold text-[#153e75] flex items-center gap-2">
                   <span class="inline-grid place-items-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#e6eef8] text-[#153e75]">2</span>
                   Identificación del AMEF
-                  <span class="tooltip tooltip-right" data-tip="Define un único alcance: Sistema, Subsistema o Componente. Evita rellenar más de uno para no duplicar el análisis.">
+                  <span class="tooltip tooltip-right"
+                    data-tip="Define un único alcance: Sistema, Subsistema o Componente. Evita rellenar más de uno para no duplicar el análisis.">
                     <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 16v-4" />
+                      <path d="M12 8h.01" />
                     </svg>
                   </span>
                 </legend>
@@ -102,16 +159,18 @@
                     <div class="label py-1">
                       <span class="label-text font-medium text-slate-900 flex items-center gap-2">
                         Código del proyecto
-                        <span class="tooltip tooltip-right" data-tip="Identificador interno del proyecto (no del producto). Ej.: P-AX34-2025. Mantiene la trazabilidad entre AMEF y plan del proyecto.">
+                        <span class="tooltip tooltip-right"
+                          data-tip="Identificador interno del proyecto (no del producto). Ej.: P-AX34-2025. Mantiene la trazabilidad entre AMEF y plan del proyecto.">
                           <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 16v-4" />
+                            <path d="M12 8h.01" />
                           </svg>
                         </span>
                       </span>
                     </div>
                     <div class="relative">
-                      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="1.8">
+                      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                         <path d="M20 7H4m16 5H4m16 5H4" />
                       </svg>
                       <input type="text" minlength="1" placeholder="Ej.: P-AX34-2025"
@@ -126,16 +185,18 @@
                     <div class="label py-1">
                       <span class="label-text font-medium text-slate-900 flex items-center gap-2">
                         Departamento líder
-                        <span class="tooltip tooltip-right" data-tip="Área responsable de emitir y mantener el AMEF: p. ej., Ingeniería de Calidad, Ingeniería de Producto o Manufacturing Engineering.">
+                        <span class="tooltip tooltip-right"
+                          data-tip="Área responsable de emitir y mantener el AMEF: p. ej., Ingeniería de Calidad, Ingeniería de Producto o Manufacturing Engineering.">
                           <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 16v-4" />
+                            <path d="M12 8h.01" />
                           </svg>
                         </span>
                       </span>
                     </div>
                     <div class="relative">
-                      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="1.8">
+                      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                         <path d="M7 10h10" />
                         <path d="M12 2v8" />
@@ -152,9 +213,12 @@
                     <div class="label py-1">
                       <span class="label-text font-medium text-slate-900 flex items-center gap-2">
                         Sistema
-                        <span class="tooltip tooltip-right" data-tip="Nivel macro del alcance. Ej.: 'Frenos ABS'. Si llenas este campo, deja Subsistema y Componente vacíos.">
+                        <span class="tooltip tooltip-right"
+                          data-tip="Nivel macro del alcance. Ej.: 'Frenos ABS'. Si llenas este campo, deja Subsistema y Componente vacíos.">
                           <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 16v-4" />
+                            <path d="M12 8h.01" />
                           </svg>
                         </span>
                       </span>
@@ -171,9 +235,12 @@
                     <div class="label py-1">
                       <span class="label-text font-medium text-slate-900 flex items-center gap-2">
                         Subsistema
-                        <span class="tooltip tooltip-right" data-tip="Nivel intermedio. Ej.: 'Hidráulico'. Usa sólo uno entre Sistema / Subsistema / Componente.">
+                        <span class="tooltip tooltip-right"
+                          data-tip="Nivel intermedio. Ej.: 'Hidráulico'. Usa sólo uno entre Sistema / Subsistema / Componente.">
                           <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 16v-4" />
+                            <path d="M12 8h.01" />
                           </svg>
                         </span>
                       </span>
@@ -190,9 +257,12 @@
                     <div class="label py-1">
                       <span class="label-text font-medium text-slate-900 flex items-center gap-2">
                         Componente
-                        <span class="tooltip tooltip-right" data-tip="Nivel más específico. Ej.: 'Bomba'. Si lo completas, no llenes Sistema ni Subsistema.">
+                        <span class="tooltip tooltip-right"
+                          data-tip="Nivel más específico. Ej.: 'Bomba'. Si lo completas, no llenes Sistema ni Subsistema.">
                           <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 16v-4" />
+                            <path d="M12 8h.01" />
                           </svg>
                         </span>
                       </span>
@@ -216,9 +286,12 @@
                 <legend class="text-base sm:text-lg font-semibold text-[#153e75] flex items-center gap-2">
                   <span class="inline-grid place-items-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#e6eef8] text-[#153e75]">3</span>
                   Fechas & Responsable
-                  <span class="tooltip tooltip-right" data-tip="Fecha de origen ≤ hoy ≤ Fecha objetivo. Mantén alineación con el plan de proyecto.">
+                  <span class="tooltip tooltip-right"
+                    data-tip="Fecha de origen ≤ hoy ≤ Fecha objetivo. Mantén alineación con el plan de proyecto.">
                     <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 16v-4" />
+                      <path d="M12 8h.01" />
                     </svg>
                   </span>
                 </legend>
@@ -229,9 +302,12 @@
                     <div class="label py-1">
                       <span class="label-text font-medium text-slate-900 flex items-center gap-2">
                         Fecha de origen
-                        <span class="tooltip tooltip-right" data-tip="Inicio del AMEF. Normalmente coincide con el arranque del proyecto o del cambio.">
+                        <span class="tooltip tooltip-right"
+                          data-tip="Inicio del AMEF. Normalmente coincide con el arranque del proyecto o del cambio.">
                           <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 16v-4" />
+                            <path d="M12 8h.01" />
                           </svg>
                         </span>
                       </span>
@@ -247,9 +323,12 @@
                     <div class="label py-1">
                       <span class="label-text font-medium text-slate-900 flex items-center gap-2">
                         Fecha objetivo
-                        <span class="tooltip tooltip-right" data-tip="Fecha planeada de cierre del AMEF o fase. Debe ser igual o posterior a hoy y coherente con el plan.">
+                        <span class="tooltip tooltip-right"
+                          data-tip="Fecha planeada de cierre del AMEF o fase. Debe ser igual o posterior a hoy y coherente con el plan.">
                           <svg class="w-4 h-4 text-slate-400 hover:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 16v-4" />
+                            <path d="M12 8h.01" />
                           </svg>
                         </span>
                       </span>
@@ -362,7 +441,9 @@ Componente: "Bomba"</pre>
                 <div class="alert bg-[#153e75]/5 border border-[#153e75]/20 text-slate-800 mt-2">
                   <div class="flex items-start gap-3">
                     <svg class="w-5 h-5 text-[#153e75] mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M13 16h-1v-4h-1" /><path d="M12 8h.01" /><circle cx="12" cy="12" r="10" />
+                      <path d="M13 16h-1v-4h-1" />
+                      <path d="M12 8h.01" />
+                      <circle cx="12" cy="12" r="10" />
                     </svg>
                     <div class="text-sm">
                       <b>Aclaración:</b> en algunos textos aparece “<em>Código del producto</em>”; en este formato usamos
@@ -418,4 +499,21 @@ Componente: "Bomba"</pre>
     </div>
   </div>
 </div>
+}
+
+<!-- Toast sutil global si el equipo está vacío -->
+@if (usersArrayEmpty()) {
+  <div aria-live="polite" class="fixed top-20 right-4 z-[60]">
+    <div class="alert alert-warning rounded-xl border border-amber-200/60 bg-amber-50/95 backdrop-blur px-4 py-3 shadow-md items-center gap-3">
+      <svg class="w-5 h-5 text-amber-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M12 8h.01M12 12v4"></path>
+      </svg>
+      <div class="text-sm leading-tight text-amber-900">
+        <b class="font-semibold">Falta el equipo</b>
+        <div class="text-amber-800/90">Debes tener por lo menos una persona en el equipo.</div>
+      </div>
+      <button type="button" class="btn btn-ghost btn-xs text-amber-700 hover:bg-amber-100">Entendido</button>
+    </div>
+  </div>
 }
