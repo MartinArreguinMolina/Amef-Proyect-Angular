@@ -1,5 +1,4 @@
 <div class="min-h-screen bg-base-100" data-theme="light">
-  <!-- HEADER -->
   <section class="container mx-auto px-6 lg:px-12 pt-8">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
@@ -20,229 +19,43 @@
     </div>
   </section>
 
-  <!-- FILTROS -->
   <section class="container mx-auto px-6 lg:px-12 mt-6">
     <div class="flex flex-col md:flex-row gap-3 md:items-center">
       <div class="join w-full md:w-auto rounded-xl border border-base-300 bg-base-100
                focus-within:ring-2 focus-within:ring-[#153e75]/30 focus-within:border-transparent transition-all">
-        <input (input)="changeFilter(idInput.value)" #idInput
-          class="input input-bordered join-item w-full md:w-96 border-0 focus:outline-none"
-          placeholder="Buscar por ID exacto (ej. AMEF-00123)" (keyup.enter)="applyId(idInput.value)" />
-        <button class="btn join-item transition-all duration-150 hover:-translate-y-0.5 hover:shadow
-                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#153e75]/30"
-          (click)="applyId(idInput.value)">
-          Buscar
-        </button>
-        <button class="btn join-item btn-ghost transition-all duration-150 hover:bg-base-200/70 hover:-translate-y-0.5
-                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#153e75]/20" (click)="clearId()">
-          Todos
-        </button>
-      </div>
+        <div class="join">
 
-      <div class="flex items-center gap-2" [class.hidden]="!idActive()">
-        <span class="badge badge-outline hover:bg-base-200 hover:border-[#153e75]/40 transition-colors"
-          [title]="idActive()">
-          ID: {{ idActive() }}
-        </span>
-        <button class="btn btn-xs btn-ghost transition-all hover:bg-base-200/70" (click)="clearId()">Quitar
-          filtro</button>
-      </div>
+          <label for="search-input" class="relative">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
+                class="h-4 w-4 opacity-70">
+                <path fill-rule="evenodd"
+                  d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+                  clip-rule="evenodd" />
+              </svg>
+            </div>
 
-      <div class="flex gap-3 md:ml-auto">
-        <select class="select select-bordered hover:border-[#153e75]/40 focus:border-[#153e75]
-                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#153e75]/30 transition-all">
-          <option selected>Ordenar: Reciente</option>
-          <option>Ordenar: Nombre (A-Z)</option>
-          <option>Ordenar: ID (A-Z)</option>
-        </select>
-        <select class="select select-bordered hover:border-[#153e75]/40 focus:border-[#153e75]
-                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#153e75]/30 transition-all">
-          <option selected>Todos los estados</option>
-          <option>Borrador</option>
-          <option>En progreso</option>
-          <option>Cerrado</option>
-        </select>
+            <input id="search-input" type="search" (input)="changeFilter(idInput.value)" #idInput
+              class="input input-bordered join-item w-full md:w-96 pl-10 focus:outline-offset-2"
+              placeholder="Buscar por responsable o tipo..." />
+          </label>
+
+          <button (click)="idInput.value = ''; changeFilter('')" class="btn btn-primary join-item btn-ghost">
+            Todos
+          </button>
+
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- GRID -->
   <section class="container mx-auto px-6 lg:px-12 py-8">
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-
-      @for (amef of amefs.value()! | FilterAmefs: fiterName(); track amef.amefId) {
-      <div class="relative block group select-none rounded-2xl focus:outline-none
-               ring-0 ring-[#153e75]/0 hover:ring-2 hover:ring-[#153e75]/25
-               hover:ring-offset-2 hover:ring-offset-base-100 transition-all duration-200">
-        <!-- Chip superior -->
-        <div class="absolute -top-4 left-8 h-9 max-w-[70%] md:max-w-[22rem] pr-3 pl-2 rounded-t-lg
-                 bg-[#153e75] text-white shadow-md flex items-center gap-2 z-20
-                 transition-transform duration-200 group-hover:-translate-y-0.5">
-          <div class="w-5 h-5 rounded-full bg-white/20 grid place-items-center text-[10px] font-bold uppercase">
-            {{ (amef.preparedBy.fullName || '—')?.[0] || '•' }}
-          </div>
-          <span class="text-xs font-medium truncate" [title]="amef.preparedBy.fullName || '—'">
-            {{ amef.preparedBy.fullName | titlecase }}
-          </span>
-        </div>
-
-        <!-- Card -->
-        <div class="relative overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-sm
-                 transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-0.5
-                 group-hover:border-[#153e75]/30">
-          <div class="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-[#153e75] via-[#0f2e58] to-[#153e75]"></div>
-          <div class="h-2 bg-gradient-to-r from-base-200 via-base-300 to-base-200"></div>
-
-          <!-- Texturas -->
-          <div class="absolute inset-0 pointer-events-none">
-            <div class="absolute inset-0 opacity-40"
-              style="background-image: radial-gradient(var(--fallback-bc,oklch(var(--bc)/.04)) 1px, transparent 1px); background-size: 14px 14px;">
-            </div>
-            <div class="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-[#153e75]/10 blur-2xl
-                        transition-opacity duration-300 group-hover:opacity-80"></div>
-          </div>
-
-          <div class="relative p-5 pt-7 pl-6">
-            <!-- Header -->
-            <div class="flex items-start justify-between gap-3">
-              <div class="flex items-center gap-2 min-w-0">
-                <svg class="w-5 h-5 text-[#153e75] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.8">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <path d="M14 2v6h6" />
-                </svg>
-                <h3 class="text-lg font-semibold text-base-content truncate">{{ amef.amefId }}</h3>
-              </div>
-            </div>
-
-            <!-- Meta chips -->
-            <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
-              @if (amef.system) {
-              <span
-                class="inline-flex items-center gap-1 rounded-md border border-base-300 bg-base-100 px-2 py-1
-                            text-xs text-base-content/70 transition-all group-hover:border-[#153e75]/40 hover:bg-base-200/60">
-                <svg class="w-3.5 h-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.8">
-                  <path d="M3 12h18M3 6h18M3 18h18" />
-                </svg>
-                <span class="text-slate-500">Sistema:</span>
-                <span class="font-mono">{{ amef.system || '—' }}</span>
-              </span>
-              }
-              @if (amef.subsystem) {
-              <span
-                class="inline-flex items-center gap-1 rounded-md border border-base-300 bg-base-100 px-2 py-1
-                            text-xs text-base-content/70 transition-all group-hover:border-[#153e75]/40 hover:bg-base-200/60">
-                <svg class="w-3.5 h-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.8">
-                  <path d="M4 6h16M4 12h10M4 18h4" />
-                </svg>
-                <span class="text-slate-500">Subsistema:</span>
-                <span class="font-mono">{{ amef.subsystem || '—' }}</span>
-              </span>
-              }
-              @if (amef.component) {
-              <span
-                class="inline-flex items-center gap-1 rounded-md border border-base-300 bg-base-100 px-2 py-1
-                            text-xs text-base-content/70 transition-all group-hover:border-[#153e75]/40 hover:bg-base-200/60">
-                <svg class="w-3.5 h-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.8">
-                  <path d="M12 2v20M2 12h20" />
-                </svg>
-                <span class="text-slate-500">Componente:</span>
-                <span class="font-mono">{{ amef.component || '—' }}</span>
-              </span>
-              }
-            </div>
-
-            <!-- ACCIONES (Split button + CTA principal) -->
-            <div class="pt-3 flex items-center justify-between gap-3">
-              <!-- Split button PDF -->
-              <div class="join">
-                <button (click)="openPdf(amef.amefId)" class="btn btn-outline join-item transition-all duration-150
-                         hover:-translate-y-0.5 hover:shadow-sm
-                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#153e75]/30"
-                  aria-label="Ver PDF" title="Ver PDF">
-                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M4 4h16v16H4z" />
-                    <path d="M8 8h8M8 12h5M8 16h8" />
-                  </svg>
-                  <span class="hidden sm:inline">Ver PDF</span>
-                </button>
-              </div>
-
-              <!-- CTA principal -->
-              <a [routerLink]="['amef', amef.amefId, 'analysis']" class="btn btn-primary transition-all duration-200
-                       hover:shadow-lg hover:-translate-y-0.5
-                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#153e75]/30">
-                Abrir análisis
-              </a>
-            </div>
-
-            <div class="mt-4 h-px bg-gradient-to-r from-transparent via-base-300 to-transparent"></div>
-
-            <!-- FOOTER -->
-            <div class="mt-4 flex items-center justify-between">
-              <div class="flex items-center gap-2 min-w-0">
-                <div class="w-7 h-7 rounded-full bg-[#153e75]/10 text-[#153e75] grid place-items-center text-xs font-bold uppercase
-                         transition-transform duration-200 group-hover:scale-110">
-                  {{ (amef.preparedBy.fullName || '—')?.[0] || '•' }}
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-base-content/60 leading-tight">Responsable</p>
-                  <p class="text-sm font-medium text-base-content whitespace-normal break-words">
-                    {{ amef.preparedBy.fullName | titlecase }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      @for (amef of amefs.value(); track amef.amefId) {
+      <amef-card [amef]="amef" />
       } @empty {
-      <!-- EMPTY STATE -->
       <div class="col-span-full">
-        <div class="relative rounded-2xl overflow-hidden shadow-xl border border-base-300">
-          <div class="h-12 bg-[#153e75] text-white flex items-center justify-between px-6">
-            <div class="flex items-center gap-2">
-              <svg class="w-5 h-5 opacity-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M3 7h5l2 2h11v9a2 2 0 0 1-2 2H3z" />
-              </svg>
-              <span class="font-semibold">Repositorio de AMEFs</span>
-            </div>
-            <span class="text-xs text-white/80">Vista de carpeta</span>
-          </div>
-
-          <div class="relative bg-base-100">
-            <div class="absolute inset-0">
-              <div
-                class="absolute -top-28 left-1/2 -translate-x-1/2 w-[48rem] h-[48rem] rounded-full bg-[#153e75]/8 blur-3xl">
-              </div>
-              <div class="absolute inset-0"
-                style="background-image: radial-gradient(var(--fallback-bc,oklch(var(--bc)/.05)) 1px, transparent 1px); background-size: 16px 16px;">
-              </div>
-            </div>
-
-            <div class="relative px-8 py-12 text-center">
-              <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#153e75]/10 text-[#153e75] shadow-sm
-                       transition-all hover:-translate-y-0.5">
-                <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-              </div>
-              <h3 class="text-2xl md:text-3xl font-bold mt-4">Aún no hay resultados</h3>
-              <p class="text-base-content/70 mt-1 max-w-xl mx-auto">
-                Usa el buscador por <b>ID exacto</b> o limpia el filtro para ver todos.
-              </p>
-              <div class="mt-5">
-                <button class="btn btn-ghost transition-all hover:bg-base-200/70 hover:-translate-y-0.5"
-                  (click)="clearId()">
-                  Mostrar todos
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <amef-card-not-found />
       </div>
       }
     </div>

@@ -20,9 +20,6 @@ export class AuthService {
   private _token = signal<string | null>(localStorage.getItem('token'));
   private _authStatus = signal<AuthStatus>('checking');
 
-  private router = inject(Router)
-
-
   token = computed(() => this._token());
   user = computed(() => this._user());
   authStatus = computed(() => {
@@ -32,10 +29,9 @@ export class AuthService {
     if(this._user()) return 'authenticated'
 
     return 'not-authenticated'
-
   })
 
-  rol = computed(() => this._user()?.roles.includes('admin'))
+  rol = computed(() => (this._user()?.roles.includes('admin') || this._user()?.roles.includes('super-admin')) ?? false)
 
   checkStatusResource = rxResource({
     stream: () => this.checkAuthStatus(),

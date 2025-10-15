@@ -3,13 +3,14 @@ import { inject, Injectable } from '@angular/core';
 import { environments } from '@env/environmets';
 import { Amef, AnalysisDto } from '../../interfaces/interfaces';
 import { AnalysisItem, CreateAnalysisPayload, UpdateAnalysisPayload } from '../analysis/analysis.component';
-import { Observable } from 'rxjs';
+import { Observable, delay } from 'rxjs';
+import { UserReponse } from '@interfaces/interfaces';
 
 export interface ActionItem {
   id: string;
   recommendedAction: string;
   responsible: string;
-  targetDate: string;             // ISO
+  targetDate: string;
 
   implementedAction?: string | null;
   completionDate?: string | null;
@@ -21,7 +22,6 @@ export interface ActionItem {
   nprBefore?: number | null;
 }
 
-/** === DTO que pide tu backend (campos opcionales) === */
 export interface ActionCreateDto {
   recommendedAction: string;
   responsible: string;
@@ -40,6 +40,14 @@ export class AmefService {
   private http = inject(HttpClient);
   private baseUrl = environments.baseUlr;
 
+  getUsersByDepartmentAndTerm(department: string, user: string){
+    return this.http.get<UserReponse[]>(`${this.baseUrl}/auth/department/${department}/user/${user}`)
+  }
+
+  getDepartaments(term: string){
+    return this.http.get<{id: string, department: string}[]>(`${this.baseUrl}/departments/${term}`)
+  }
+
   createOrganizationalInformation(body: {}) {
     return this.http.post(`${this.baseUrl}/organizational-information`, body);
   }
@@ -50,6 +58,12 @@ export class AmefService {
 
   getAmefById(amefId: string) {
     return this.http.get<Amef>(`${this.baseUrl}/organizational-information/${amefId}`);
+  }
+
+  getAmefByTerm(term: string) {
+    return this.http.get<Amef[]>(`${this.baseUrl}/organizational-information/findAllByTerm/${term}`).pipe(
+      delay(200)
+    )
   }
 
   listAnalyses(amefId: string) {
@@ -68,7 +82,6 @@ export class AmefService {
     return this.http.delete<void>(`${this.baseUrl}/amef/${amefId}/analysis/${analysisId}`);
   }
 
-  /* ===== Acciones ===== */
   createAction(amefId: string, analysisId: string, dto: ActionCreateDto): Observable<ActionItem> {
     return this.http.post<ActionItem>(
       `${this.baseUrl}/amef/${amefId}/analysis/${analysisId}/actions`,
@@ -95,7 +108,6 @@ export class AmefService {
     );
   }
 
-  /* NPR base del análisis */
   getAnalysis(amefId: string, analysisId: string) {
     return this.http.get<{ severity: number; occurrence: number; detection: number }>(
       `${this.baseUrl}/amef/${amefId}/analysis/${analysisId}`

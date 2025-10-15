@@ -14,7 +14,7 @@
 
     <div class="z-10 text-center max-w-md" style="text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
       <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4 animate-fade-in-down">
-        Sistema AMEF Automotriz
+        Sistema AMEF
       </h1>
       <p class="text-lg opacity-90 leading-relaxed animate-fade-in-up">
         Gestión profesional para el Análisis de Modo y Efecto de Falla. Potencia la calidad y seguridad en tus procesos.
@@ -51,6 +51,7 @@
                 <input type="email" placeholder="Correo Electrónico"
                   class="input w-full pl-4 bg-white/70 border-gray-300/80 placeholder-gray-500 text-gray-800 focus:border-cyan-400 focus:ring focus:ring-cyan-300 focus:ring-opacity-50"
                   formControlName="email" required />
+                  <forms-error-label [control]="this.login.get('email')!"/>
               </div>
 
               <div class="relative">
@@ -79,3 +80,15 @@
     </div>
   </div>
 </div>
+
+@if(this.credentialError()){
+<div class="fixed top-5 right-4">
+  <div role="alert" class="alert alert-error">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <span>Credenciales invalidas, verifica tu informacion</span>
+  </div>
+</div>
+}

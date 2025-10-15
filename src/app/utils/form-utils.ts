@@ -14,9 +14,8 @@ async function sleep() {
 }
 
 export class FormUtils {
-  // Expresiones regulares
   static namePattern = '([a-zA-Z]+) ([a-zA-Z]+)';
-  static emailPattern = '^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$';
+  static emailPattern = /^(?!.*\.\.)([A-Za-z0-9._%+-]{1,64})@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}$/;
   static notOnlySpacesPattern = '^[a-zA-Z0-9]+$';
   static slugPattern = '^[a-z0-9_]+(?:-[a-z0-9_]+)*$';
   static phoneNumberPattern = '^\d{10}$';
@@ -47,7 +46,7 @@ export class FormUtils {
           return `No se puede usar el username de strider en la app`;
 
         case 'pattern':
-          if (errors['pattern'].requiredPattern === FormUtils.emailPattern) {
+          if (errors['pattern'].requiredPattern.includes(this.emailPattern.toString())) {
             return 'El valor ingresado no luce como un correo electrónico';
           }
 

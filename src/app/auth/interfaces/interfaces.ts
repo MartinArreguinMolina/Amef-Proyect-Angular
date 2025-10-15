@@ -10,4 +10,5 @@ export interface UserReponse {
   isActive: boolean;
   roles:    string[];
   token:    string;
+  departaments: string[]
 }

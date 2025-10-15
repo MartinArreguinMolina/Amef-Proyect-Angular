@@ -1,62 +1,43 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AmefService } from '../services/amef.service';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { TitleCasePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { signal } from '@angular/core';
-import { of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
-import { FilterAmefsPipe } from '../../pipes/filter-amefs.pipe';
-import { Amef } from '../../interfaces/interfaces';
+import { AuthService } from 'src/app/auth/service/auth-service.service';
+import { environments } from '@env/environmets';
+import { AmefCardComponent } from "../../components/amef-card/amef-card.component";
+import { AmefCardNotFoundComponent } from '../../components/amef-card-not-found/amef-card-not-found.component';
 
 @Component({
   selector: 'app-amef',
   standalone: true,
-  imports: [TitleCasePipe, RouterLink, FilterAmefsPipe],
+  imports: [RouterLink, AmefCardComponent, AmefCardNotFoundComponent],
   templateUrl: './amef.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AmefComponent {
+  authService = inject(AuthService)
+  baseUrlPdf = environments.baseUrlPdf;
   private amefService = inject(AmefService);
-  private filterId = signal<string>('');
+  filter = signal<string>('')
 
-  fiterName = signal<string>('')
+  changeFilter(filter: string) {
+    if (!filter) {
+      this.filter.set('')
+      return;
+    };
 
-  openPdf(amefId: string){
-    window.open(`http://localhost:3000/api/v1/amef-report/${amefId}`)
+    this.filter.set(filter)
   }
 
+  amefs = rxResource({
+    params: () => {
+      return { filter: this.filter() }
+    },
+    stream: ({ params }) => {
+      if (params.filter) return this.amefService.getAmefByTerm(params.filter)
 
-  changeFilter(filter: string){
-    if(!filter) filter;
-
-    this.fiterName.set(filter)
-  }
-
-  amefs = rxResource<Amef[], string | null>({
-    params: () => this.filterId().trim() || null,
-    stream: ({ params }) =>
-      params
-        ? this.amefService
-          .getAmefById(params)
-          .pipe(
-            map((one: any) => (one ? [one] : [])),
-            catchError(() => of([]))
-          )
-        // Si no hay ID, cargamos todos
-        : this.amefService.getAmefs().pipe(
-          catchError(() => of([]))
-        ),
-  });
-
-  applyId(raw: string) {
-    this.filterId.set((raw ?? '').trim());
-  }
-  clearId() {
-    this.filterId.set('');
-  }
-
-  idActive() {
-    return this.filterId();
-  }
+      return this.amefService.getAmefs()
+    }
+  })
 }

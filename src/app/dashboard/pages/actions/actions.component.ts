@@ -1,4 +1,4 @@
-import { CommonModule, Location } from '@angular/common';
+import { AsyncPipe, CommonModule, Location } from '@angular/common';
 import {
   ChangeDetectionStrategy, Component, OnInit,
   Directive, ElementRef, HostListener,
@@ -15,10 +15,10 @@ import { AmefService, ActionItem, ActionCreateDto } from '../services/amef.servi
 import { FormsErrorLabelComponent } from 'src/app/shared/forms-error-label/forms-error-label.component';
 import { AuthService } from 'src/app/auth/service/auth-service.service';
 
-/* Auto-resize */
+/* ========= Auto-resize para <textarea> ========= */
 @Directive({ selector: 'textarea[autoResize]', standalone: true })
 export class AutoResizeTextareaDirective {
-  constructor(private el: ElementRef<HTMLTextAreaElement>) {}
+  constructor(private el: ElementRef<HTMLTextAreaElement>) { }
   ngAfterViewInit() { setTimeout(() => this.resize()); }
   @HostListener('input') onInput() { this.resize(); }
   private resize() {
@@ -28,12 +28,20 @@ export class AutoResizeTextareaDirective {
   }
 }
 
-/* Form tipado */
+/* ========= Tipos ========= */
+export interface UserOption {
+  id?: string;
+  fullName: string;
+  email?: string;
+  department?: string;
+}
+
 type ActionForm = FormGroup<{
   id: FormControl<string | null>;
 
   recommendedAction: FormControl<string>;
-  responsible: FormControl<string>;
+  responsibleText: FormControl<string>;          // <- texto del input
+  responsible: FormControl<UserOption | null>;   // <- selección real
   targetDate: FormControl<string>;
 
   implementedAction: FormControl<string | null>;
@@ -46,6 +54,7 @@ type ActionForm = FormGroup<{
 
 type ToastKind = 'success' | 'update' | 'delete' | 'error';
 
+/* ========= Componente ========= */
 @Component({
   selector: 'app-actions',
   standalone: true,
@@ -57,37 +66,13 @@ export class ActionsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private api = inject(AmefService);
   private fb = inject(FormBuilder);
+  private location = inject(Location);
+  private auth = inject(AuthService);
 
-  authService = inject(AuthService)
-
-  termSearch = signal<string>('')
-
-  constructor(private location: Location){}
-
-  goToBack(){
-    this.location.back()
-  }
-
-  changeSearch(term: string){
-    if(!term){
-      this.termSearch.set('')
-      return;
-    }
-
-    this.termSearch.set(term)
-  }
-
-  users = rxResource({
-    params: () => {
-      return ({term: this.termSearch()})
-    },
-    stream: ({params}) => this.authService.getUserTerm(params.term)
-  })
-
-  addUser(user: string){
-    this.form.patchValue({responsible: user})
-    this.termSearch.set('');
-  }
+  /* ====== UI / estado ====== */
+  resposibleError = signal<boolean>(false);
+  termSearch = signal<string>('');
+  department = signal<string>('');
 
   amefId = signal<string>('');
   analysisId = signal<string>('');
@@ -97,7 +82,7 @@ export class ActionsComponent implements OnInit {
   saving = signal<boolean>(false);
   creatingNew = signal<boolean>(false);
 
-  /* Toast */
+  /* ====== Toast ====== */
   toast = signal<{ kind: ToastKind; text: string } | null>(null);
   private toastTimer?: any;
   private showToast(text: string, kind: ToastKind = 'success', ms = 2200) {
@@ -107,7 +92,22 @@ export class ActionsComponent implements OnInit {
   }
   closeToast() { if (this.toastTimer) clearTimeout(this.toastTimer); this.toast.set(null); }
 
-  /* NPR base del análisis */
+  /* ====== Data remota ====== */
+  departaments = rxResource({
+    stream: () => this.api.getDepartaments('')
+  });
+
+  users = rxResource<UserOption[], { term: string; department: string }>({
+    params: () => ({ term: this.termSearch(), department: this.department() }),
+    stream: ({ params }) =>
+      (params.department && params.term)
+        ? this.api.getUsersByDepartmentAndTerm(params.department, params.term)
+        : (params.term && !params.department)
+            ? this.auth.getUserTerm(params.term)
+            : of([])
+  });
+
+  /* ====== Métricas NPR base ====== */
   analysisRes = rxResource<
     { severity: number; occurrence: number; detection: number } | null,
     { amefId: string; analysisId: string } | null
@@ -127,7 +127,7 @@ export class ActionsComponent implements OnInit {
     return s && o && d ? s * o * d : null;
   });
 
-  /* Acciones */
+  /* ====== Listado de acciones ====== */
   actionsRes = rxResource<ActionItem[], { amefId: string; analysisId: string } | null>({
     params: () => {
       const a = this.amefId(); const b = this.analysisId();
@@ -144,7 +144,6 @@ export class ActionsComponent implements OnInit {
       (a.recommendedAction ?? '').toLowerCase().includes(q) ||
       (a.responsible ?? '').toLowerCase().includes(q)
     );
-    // vencidas primero, luego target asc
     return filtered.sort((a, b) => {
       const overdue = (x: ActionItem) =>
         !x.completionDate &&
@@ -157,40 +156,41 @@ export class ActionsComponent implements OnInit {
     });
   });
 
-  /* Formulario */
+  /* ====== Form ====== */
   form: ActionForm = this.fb.group({
     id: this.fb.control<string | null>(null),
 
     recommendedAction: this.fb.control<string>('', { nonNullable: true, validators: [Validators.required] }),
-    responsible:       this.fb.control<string>('', { nonNullable: true, validators: [Validators.required] }),
-    targetDate:        this.fb.control<string>('', { nonNullable: true, validators: [Validators.required] }),
+
+    // 🔹 Campo visible (texto) + valor real seleccionado
+    responsibleText: this.fb.control<string>('', { nonNullable: true }),
+    responsible:     this.fb.control<UserOption | null>(null),
+
+    targetDate: this.fb.control<string>('', { nonNullable: true, validators: [Validators.required] }),
 
     implementedAction: this.fb.control<string | null>(null),
-    completionDate:    this.fb.control<string | null>(null),
+    completionDate:   this.fb.control<string | null>(null),
 
     newSeverity:   this.fb.control<number | null>(null, { validators: [Validators.min(1), Validators.max(10)] }),
     newOccurrence: this.fb.control<number | null>(null, { validators: [Validators.min(1), Validators.max(10)] }),
     newDetection:  this.fb.control<number | null>(null, { validators: [Validators.min(1), Validators.max(10)] }),
   });
 
-  /** Puente: observable del form -> señal reactiva */
   private formState = toSignal(this.form.valueChanges, {
     initialValue: this.form.getRawValue()
   });
 
-  /* NPR' (solo si hay S’/O’/D’) */
   nprAfter = computed<number | null>(() => {
-    const v = this.formState();   // <- cambia cuando el form emite
-    const s = Number(v.newSeverity   ?? 0);
+    const v = this.formState();
+    const s = Number(v.newSeverity ?? 0);
     const o = Number(v.newOccurrence ?? 0);
-    const d = Number(v.newDetection  ?? 0);
+    const d = Number(v.newDetection ?? 0);
     return (s && o && d) ? s * o * d : null;
   });
 
-  // NPR efectivo mostrado en el círculo: usa NPR' si existe, si no el NPR base
   nprEffective = computed<number | null>(() => this.nprAfter() ?? this.nprBefore());
 
-  /* Sincroniza selección -> form (emitimos cambios para refrescar NPR) */
+  /* ====== Sync selección -> form ====== */
   private syncFormEffect = effect(() => {
     const list = this.listFiltered();
     const current = this.selected();
@@ -201,7 +201,7 @@ export class ActionsComponent implements OnInit {
 
     if (!sel) {
       this.selected.set(null);
-      this.form.reset(); // emite por defecto
+      this.form.reset();
       return;
     }
 
@@ -212,27 +212,71 @@ export class ActionsComponent implements OnInit {
     this.form.setValue({
       id: item.id,
       recommendedAction: item.recommendedAction ?? '',
-      responsible:       item.responsible ?? '',
-      targetDate:        item.targetDate ?? '',
+
+      // Al cargar desde BD ponemos el texto y dejamos la selección real vacía
+      responsibleText: item.responsible ?? '',
+      responsible: null,
+
+      targetDate: item.targetDate ?? '',
 
       implementedAction: item.implementedAction ?? null,
-      completionDate:    item.completionDate ?? null,
+      completionDate: item.completionDate ?? null,
 
-      newSeverity:   item.newSeverity ?? null,
+      newSeverity: item.newSeverity ?? null,
       newOccurrence: item.newOccurrence ?? null,
-      newDetection:  item.newDetection ?? null,
-    }); // <- sin emitEvent:false
+      newDetection: item.newDetection ?? null,
+    }, { emitEvent: true });
   });
 
-  ngOnInit(): void {
+  /* ====== Ciclo de vida ====== */
+  async ngOnInit() {
     const amefId = this.route.snapshot.paramMap.get('amefId');
     const analysisId = this.route.snapshot.paramMap.get('analysisId');
     if (amefId) this.amefId.set(amefId);
     if (analysisId) this.analysisId.set(analysisId);
   }
 
+  /* ====== Navegación ====== */
+  goToBack() { this.location.back(); }
+
+  /* ====== Filtros & búsqueda ====== */
   setSearch(v: string) { this.search.set(v); }
 
+  changeSearch(term: string) {
+    this.termSearch.set(term ?? '');
+  }
+
+  changeDeparment(department: string) {
+    this.department.set(department ?? '');
+  }
+
+  deleteFilterDeparment() {
+    this.department.set('');
+  }
+
+  /* ====== Input Responsable: texto y sugerencias ====== */
+  onResponsibleInput(term: string) {
+    this.form.patchValue({ responsibleText: term });
+    this.resposibleError.set(false);
+    this.changeSearch(term);
+    // cada vez que cambia el texto, invalida selección previa
+    this.form.patchValue({ responsible: null }, { emitEvent: false });
+  }
+
+  onSelectUser(u: UserOption) {
+    this.form.patchValue({
+      responsibleText: u.fullName,
+      responsible: u
+    });
+    this.termSearch.set('');
+  }
+
+  clearResponsible() {
+    this.form.patchValue({ responsibleText: '', responsible: null });
+    this.termSearch.set('');
+  }
+
+  /* ====== Listado ====== */
   select(id: string) {
     this.creatingNew.set(false);
     this.selected.set(id);
@@ -241,33 +285,40 @@ export class ActionsComponent implements OnInit {
   newAction() {
     this.creatingNew.set(true);
     this.selected.set(null);
-    this.form.reset({ id: null });
+    this.form.reset({ id: null, responsible: null, responsibleText: '' });
   }
 
+  /* ====== Guardar / Eliminar ====== */
   save() {
-    // Validación simple de fechas si ambas existen
     const target = this.form.value.targetDate ? new Date(this.form.value.targetDate).getTime() : 0;
-    const done   = this.form.value.completionDate ? new Date(this.form.value.completionDate).getTime() : 0;
+    const done = this.form.value.completionDate ? new Date(this.form.value.completionDate).getTime() : 0;
     if (done && target && done < target) {
       this.showToast('La fecha de cierre no puede ser anterior a la target', 'error');
       return;
     }
 
+    // Validación mínima
+    if (!this.form.value.responsible) {
+      this.resposibleError.set(true);
+      this.showToast('Selecciona un responsable de la lista', 'error');
+      return;
+    }
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
 
     this.saving.set(true);
     const wasCreate = !this.form.value.id;
 
-    // DTO con campos opcionales, acorde a CreateActionDto
+    const responsibleName = this.form.value.responsible!.fullName;
+
     const dto: ActionCreateDto = {
       recommendedAction: this.form.value.recommendedAction!,
-      responsible:       this.form.value.responsible!,
-      targetDate:        this.form.value.targetDate!,
+      responsible: responsibleName, // API espera string
+      targetDate: this.form.value.targetDate!,
       ...(this.form.value.implementedAction ? { implementedAction: this.form.value.implementedAction } : {}),
-      ...(this.form.value.completionDate   ? { completionDate: this.form.value.completionDate } : {}),
-      ...(this.form.value.newSeverity      ? { newSeverity:   Number(this.form.value.newSeverity) } : {}),
-      ...(this.form.value.newOccurrence    ? { newOccurrence: Number(this.form.value.newOccurrence) } : {}),
-      ...(this.form.value.newDetection     ? { newDetection:  Number(this.form.value.newDetection) } : {}),
+      ...(this.form.value.completionDate ? { completionDate: this.form.value.completionDate } : {}),
+      ...(this.form.value.newSeverity ? { newSeverity: Number(this.form.value.newSeverity) } : {}),
+      ...(this.form.value.newOccurrence ? { newOccurrence: Number(this.form.value.newOccurrence) } : {}),
+      ...(this.form.value.newDetection ? { newDetection: Number(this.form.value.newDetection) } : {}),
     };
 
     const req$: Observable<ActionItem> = wasCreate
@@ -308,6 +359,7 @@ export class ActionsComponent implements OnInit {
     });
   }
 
+  /* ====== Helpers UI ====== */
   nprColor(npr: number | null) {
     if (!npr) return 'badge-ghost';
     if (npr >= 200) return 'bg-red-100 text-red-800 border-red-200';

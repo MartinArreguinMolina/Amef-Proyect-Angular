@@ -5,6 +5,7 @@ import { OrganizationalInformationComponent } from "./pages/organizational-infor
 import { AnalysisComponent } from "./pages/analysis/analysis.component";
 import { ActionsComponent } from "./pages/actions/actions.component";
 import { GraphicsComponent } from "./pages/graphics/graphics.component";
+import { isAdminGuard } from "../auth/guard/isAdmin.guard";
 
 
 export const dashBoardRoutes: Routes = [
@@ -18,15 +19,24 @@ export const dashBoardRoutes: Routes = [
       },
       {
         path: 'organizational-information',
-        component: OrganizationalInformationComponent
+        component: OrganizationalInformationComponent,
+        canMatch: [
+          isAdminGuard
+        ],
       },
       {
         path: 'amef/:amefId/analysis',
-        component: AnalysisComponent
+        component: AnalysisComponent,
+        canMatch: [
+          isAdminGuard
+        ],
       },
       {
         path: 'amef/:amefId/analysis/:analysisId/actions',
-        component: ActionsComponent
+        component: ActionsComponent,
+        canMatch: [
+          isAdminGuard
+        ],
       },
       {
         path: 'graphics',
