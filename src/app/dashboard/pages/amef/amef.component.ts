@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { AmefService } from '../services/amef.service';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { TitleCasePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { signal } from '@angular/core';
@@ -21,6 +21,9 @@ export class AmefComponent {
   private amefService = inject(AmefService);
   filter = signal<string>('')
 
+  userId = signal<string>(this.authService.user()!.id)
+
+
   changeFilter(filter: string) {
     if (!filter) {
       this.filter.set('')
@@ -32,12 +35,12 @@ export class AmefComponent {
 
   amefs = rxResource({
     params: () => {
-      return { filter: this.filter() }
+      return { filter: this.filter(), userId: this.userId()}
     },
     stream: ({ params }) => {
-      if (params.filter) return this.amefService.getAmefByTerm(params.filter)
+      if (params.filter) return this.amefService.getAmefsByIdAndTerm(params.userId, params.filter)
 
-      return this.amefService.getAmefs()
+      return this.amefService.getAmefsById(params.userId)
     }
   })
 }

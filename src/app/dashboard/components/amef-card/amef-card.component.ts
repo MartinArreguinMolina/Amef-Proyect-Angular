@@ -15,7 +15,12 @@ export class AmefCardComponent {
   baseUrlPdf = environments.baseUrlPdf;
   authService = inject(AuthService)
   amef = input.required<Amef>();
+
   openPdf(amefId: string) {
     window.open(`${this.baseUrlPdf}${amefId}`)
+  }
+
+  downloadExcel(amefId: string){
+    window.open(`${this.baseUrlPdf}${amefId}/amef`)
   }
 }

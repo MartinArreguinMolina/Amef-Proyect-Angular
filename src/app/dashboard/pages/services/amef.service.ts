@@ -52,12 +52,16 @@ export class AmefService {
     return this.http.post(`${this.baseUrl}/organizational-information`, body);
   }
 
-  getAmefs() {
-    return this.http.get<Amef[]>(`${this.baseUrl}/organizational-information`);
+  getAmefsByIdAndTerm(id: string, term: string){
+    return this.http.get<Amef[]>(`${this.baseUrl}/organizational-information/${id}/term/${term}`)
   }
 
-  getAmefById(amefId: string) {
-    return this.http.get<Amef>(`${this.baseUrl}/organizational-information/${amefId}`);
+  getAmefsById(id: string){
+    return this.http.get<Amef[]>(`${this.baseUrl}/organizational-information/${id}`)
+  }
+
+  getAmefs() {
+    return this.http.get<Amef[]>(`${this.baseUrl}/organizational-information`);
   }
 
   getAmefByTerm(term: string) {
