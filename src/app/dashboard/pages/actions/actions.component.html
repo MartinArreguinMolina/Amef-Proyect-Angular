@@ -1,34 +1,33 @@
-<!-- ===================== ACCIONES — PANTALLA REDISEÑADA (UX MEJORADA) ===================== -->
-<div class="min-h-screen bg-gradient-to-b from-white to-slate-50 text-slate-800" data-theme="light">
-  <!-- Top Accent -->
+<app-navbar/>
+<div class="min-h-dvh bg-gradient-to-b from-white to-slate-50 text-slate-800" data-theme="light">
   <div class="h-1 bg-gradient-to-r from-[#153e75] via-black to-[#153e75]"></div>
 
-  <!-- ===================== APP BAR ===================== -->
   <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
     <div class="h-0.5 bg-gradient-to-r from-[#153e75] via-black to-[#153e75]"></div>
-    <div class="mx-auto max-w-[1300px] px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between">
+    <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 xl:px-10 h-14 sm:h-16 flex items-center justify-between">
       <nav class="breadcrumbs text-xs sm:text-sm text-slate-500 truncate">
         <ul>
-          <li routerLink="/"><a class="hover:text-black focus:outline-none focus:ring-2 focus:ring-[#153e75]/40 rounded">Inicio</a></li>
-          <li routerLink="/dashboard"><a class="hover:text-black focus:outline-none focus:ring-2 focus:ring-[#153e75]/40 rounded">AMEFs</a></li>
-          <li (click)="goToBack()"><a class="hover:text-black focus:outline-none focus:ring-2 focus:ring-[#153e75]/40 rounded">Analysis</a></li>
+          <li routerLink="/"><a
+              class="hover:text-black focus:outline-none focus:ring-2 focus:ring-[#153e75]/40 rounded">Inicio</a></li>
+          <li routerLink="/dashboard"><a
+              class="hover:text-black focus:outline-none focus:ring-2 focus:ring-[#153e75]/40 rounded">AMEFs</a></li>
+          <li (click)="goToBack()"><a
+              class="hover:text-black focus:outline-none focus:ring-2 focus:ring-[#153e75]/40 rounded">Analysis</a></li>
           <li class="text-slate-800 font-semibold">Acción</li>
         </ul>
       </nav>
     </div>
   </header>
 
-  <!-- ===================== LAYOUT ===================== -->
-  <div class="mx-auto max-w-[1300px] px-6 lg:px-10 py-6 grid grid-cols-12 gap-6">
-
-    <!-- ========== LISTA (IZQUIERDA) ========== -->
+  <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 xl:px-10 py-6 grid grid-cols-12 gap-6">
     <aside class="col-span-12 md:col-span-4 xl:col-span-3">
       <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <!-- Search -->
         <div class="p-3.5 sm:p-4 border-b border-slate-200 space-y-3">
           <div class="relative">
-            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" />
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="m21 21-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" />
             </svg>
             <input #q
               class="input input-sm input-bordered w-full pl-9 pr-2 bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20 rounded-xl"
@@ -36,16 +35,13 @@
           </div>
         </div>
 
-        <!-- Lista -->
-        <div class="max-h-[70vh] overflow-auto">
-          <!-- Loading skeleton -->
+        <div class="max-h-[66dvh] sm:max-h-[70dvh] lg:max-h-[72dvh] overflow-auto">
           <div class="p-4 animate-pulse space-y-2" [class.hidden]="actionsRes.status() !== 'loading'">
             <div class="h-3 bg-slate-100 rounded"></div>
             <div class="h-3 bg-slate-100 rounded w-2/3"></div>
             <div class="h-3 bg-slate-100 rounded"></div>
           </div>
 
-          <!-- Items -->
           @for (a of listFiltered(); track a.id) {
           <button
             class="relative w-full text-left p-3.5 sm:p-4 transition flex items-start gap-3 border-b border-slate-100 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#153e75]/20"
@@ -66,20 +62,22 @@
               <div class="text-xs text-slate-500 truncate">{{ a.responsible || 'Sin responsable' }}</div>
               <div class="mt-2 flex items-center gap-2 text-[11px]">
                 <span class="text-slate-500">Target:</span>
-                <span class="px-1.5 py-0.5 rounded border border-slate-200 bg-slate-50 text-slate-700">{{ a.targetDate || '—' }}</span>
+                <span class="px-1.5 py-0.5 rounded border border-slate-200 bg-slate-50 text-slate-700">{{ a.targetDate
+                  || '—' }}</span>
               </div>
             </div>
 
             <div class="text-right shrink-0">
               <div class="text-[10px] tracking-wide uppercase text-slate-500">NPRʼ</div>
-              <span class="badge mt-0.5 border {{ nprColor((a.newSeverity && a.newOccurrence && a.newDetection) ? (a.newSeverity*a.newOccurrence*a.newDetection) : null) }}">
-                {{ (a.newSeverity && a.newOccurrence && a.newDetection) ? (a.newSeverity*a.newOccurrence*a.newDetection) : '—' }}
+              <span
+                class="badge mt-0.5 border {{ nprColor((a.newSeverity && a.newOccurrence && a.newDetection) ? (a.newSeverity*a.newOccurrence*a.newDetection) : null) }}">
+                {{ (a.newSeverity && a.newOccurrence && a.newDetection) ? (a.newSeverity*a.newOccurrence*a.newDetection)
+                : '—' }}
               </span>
             </div>
           </button>
           }
 
-          <!-- Empty state -->
           <div class="p-6 text-slate-500"
             [class.hidden]="!(listFiltered().length === 0 && actionsRes.status() !== 'loading')">
             <div class="rounded-xl border border-dashed border-slate-300 p-5 text-sm grid place-items-center">
@@ -93,55 +91,50 @@
       </div>
     </aside>
 
-    <!-- ========== FORM (CENTRO) ========== -->
     <main class="col-span-12 md:col-span-8 xl:col-span-6">
       <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div class="h-1 bg-[#153e75]"></div>
 
-        <div class="p-6 sm:p-7 space-y-8" [formGroup]="form">
+        <div class="p-5 sm:p-6 md:p-7 space-y-7" [formGroup]="form">
           <div class="flex items-center justify-between gap-3">
             <div class="min-w-0">
-              <h3 class="text-lg font-bold text-slate-900 leading-tight truncate">Acción</h3>
-              <p class="mt-0.5 text-xs text-slate-500">Prioriza eliminar <b>modo</b> o <b>causa</b>; si no, mejora <b>prevención</b>/<b>detección</b>.</p>
+              <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-tight truncate">Acción</h3>
+              <p class="mt-0.5 text-[11px] sm:text-xs text-slate-500">Prioriza eliminar <b>modo</b> o <b>causa</b>; si
+                no, mejora <b>prevención</b>/<b>detección</b>.</p>
             </div>
-            <label for="actions-guide-modal" class="btn btn-xs sm:btn-sm btn-outline">Guía</label>
+            <label for="actions-guide-modal" class="btn btn-xs sm:btn-sm btn-outline rounded-xl">Guía</label>
           </div>
 
-          <!-- Definición -->
-          <section aria-labelledby="definicion" class="grid grid-cols-12 gap-6">
+          <section aria-labelledby="definicion" class="grid grid-cols-12 gap-4 sm:gap-6">
             <h4 id="definicion" class="col-span-12 text-[13px] font-semibold text-slate-700">Definición</h4>
 
-            <!-- Recomendación -->
             <label class="form-control flex flex-col gap-2 sm:gap-3 col-span-12">
               <span class="label-text text-[13px] font-medium text-slate-700">Acción recomendada</span>
-              <div class="text-[11px] text-slate-500 -mt-1">Específica y verificable. Ej.: “Sustituir fijación por soldadura por puntos en subensamble X”.</div>
+              <div class="text-[11px] text-slate-500 -mt-1">Específica y verificable. Ej.: “Sustituir fijación por
+                soldadura por puntos en subensamble X”.</div>
               <textarea autoResize rows="3"
                 class="textarea textarea-bordered min-h-[96px] rounded-xl bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 leading-relaxed focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
                 formControlName="recommendedAction" placeholder="Describe exactamente qué harás…"></textarea>
               <forms-error-label [control]="form.get('recommendedAction')!" />
             </label>
 
-            <!-- Responsable (input texto + sugerencias) -->
             <label class="form-control flex flex-col gap-2 sm:gap-3 col-span-12 md:col-span-6">
               <span class="label-text text-[13px] font-medium text-slate-700">Responsable</span>
               <div class="text-[11px] text-slate-500 -mt-1">Persona que ejecuta/coordina (no “equipo”).</div>
 
               <div class="relative">
-                <input
-                  (input)="onResponsibleInput(search.value)"
+                <input (input)="onResponsibleInput(search.value)"
                   class="input input-bordered w-full rounded-xl bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
-                  formControlName="responsibleText"
-                  placeholder="Nombre completo"
-                  #search
-                  aria-haspopup="listbox"
+                  formControlName="responsibleText" placeholder="Nombre completo" #search aria-haspopup="listbox"
                   aria-expanded="{{ this.users.hasValue() && this.users.value()!.length > 0 }}" />
 
-                <!-- Sugerencias -->
                 @if (this.users.hasValue() && this.users.value()!.length > 0) {
                 <div class="absolute left-0 right-0 mt-1 z-30">
-                  <ul class="rounded-2xl bg-white/95 backdrop-blur border border-slate-200 shadow-2xl ring-1 ring-black/5 overflow-hidden"
-                      role="listbox" aria-label="Sugerencias de responsables">
-                    <li class="px-3 py-2 text-[11px] font-semibold tracking-wide uppercase text-slate-500 bg-slate-50 border-b border-slate-200">
+                  <ul
+                    class="rounded-2xl bg-white/95 backdrop-blur border border-slate-200 shadow-2xl ring-1 ring-black/5 overflow-hidden"
+                    role="listbox" aria-label="Sugerencias de responsables">
+                    <li
+                      class="px-3 py-2 text-[11px] font-semibold tracking-wide uppercase text-slate-500 bg-slate-50 border-b border-slate-200">
                       Sugerencias ({{ this.users.value()!.length }})
                     </li>
                     <li class="max-h-60 overflow-y-auto">
@@ -153,7 +146,8 @@
                             title="{{ user.fullName }}">
                             <div class="min-w-0 flex-1">
                               <div class="font-medium truncate text-slate-900">{{ user.fullName | titlecase }}</div>
-                              <div class="text-[11px] text-slate-500 truncate">{{ user.email || 'Seleccionar como responsable' }}</div>
+                              <div class="text-[11px] text-slate-500 truncate">{{ user.email || 'Seleccionar como
+                                responsable' }}</div>
                             </div>
                           </button>
                         </li>
@@ -165,44 +159,37 @@
                 }
               </div>
 
-              <!-- error si no hay selección -->
-              @if (resposibleError()) {
-                <div class="mt-1 text-[11px] text-rose-700 bg-rose-50/70 border border-rose-200 rounded-md px-2 py-1.5 inline-flex items-center gap-1.5">
-                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M12 8h.01M12 12v4"></path>
-                  </svg>
-                  Selecciona un responsable de la lista.
-                </div>
+              @if (responsibleError()) {
+              <div
+                class="mt-1 text-[11px] text-rose-700 bg-rose-50/70 border border-rose-200 rounded-md px-2 py-1.5 inline-flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M12 8h.01M12 12v4"></path>
+                </svg>
+                Selecciona un responsable de la lista.
+              </div>
               }
 
-              <!-- Filtros por departamento -->
               <div class="flex flex-wrap gap-2 pt-1">
-                <!-- Azul marino, igual que CTA -->
-                <button type="button" (click)="deleteFilterDeparment()"
-                        class="btn btn-xs text-white bg-[#153e75] hover:bg-black">
-                  Limpiar filtros
-                </button>
+                <button type="button" (click)="clearDepartmentFilter()"
+                  class="btn btn-xs text-white bg-[#153e75] hover:bg-black rounded-xl">Limpiar filtros</button>
 
                 @if(users.error()){
-                  <span class="text-[12px] text-rose-600">Error al cargar usuarios.</span>
+                <span class="text-[12px] text-rose-600">Error al cargar usuarios.</span>
                 }
 
                 @for (department of departaments.value(); track $index) {
-                <button type="button"
-                        (click)="changeDeparment(department.department)"
-                        class="btn btn-xs border-slate-300"
-                        [ngClass]="{
-                          'bg-[#153e75] text-white hover:bg-[#0f2e58] border-[#153e75]': department.department === this.department(),
-                          'btn-outline text-slate-700 hover:bg-slate-100': department.department !== this.department()
-                        }">
+                <button type="button" (click)="changeDepartment(department.department)"
+                  class="btn btn-xs border-slate-300" [ngClass]="{
+                    'bg-[#153e75] text-white hover:bg-[#0f2e58] border-[#153e75]': department.department === this.department(),
+                    'btn-outline text-slate-700 hover:bg-slate-100': department.department !== this.department()
+                  }">
                   {{ department.department }}
                 </button>
                 }
               </div>
             </label>
 
-            <!-- Fecha target -->
             <label class="form-control flex flex-col gap-2 sm:gap-3 col-span-12 md:col-span-6">
               <span class="label-text text-[13px] font-medium text-slate-700">Fecha target</span>
               <div class="text-[11px] text-slate-500 -mt-1">Compromiso de cierre.</div>
@@ -213,13 +200,13 @@
             </label>
           </section>
 
-          <!-- Cierre -->
-          <section aria-labelledby="cierre" class="grid grid-cols-12 gap-6">
+          <section aria-labelledby="cierre" class="grid grid-cols-12 gap-4 sm:gap-6">
             <h4 id="cierre" class="col-span-12 text-[13px] font-semibold text-slate-700">Cierre</h4>
 
             <label class="form-control flex flex-col gap-2 sm:gap-3 col-span-12">
               <span class="label-text text-[13px] font-medium text-slate-700">Acción implementada</span>
-              <div class="text-[11px] text-slate-500 -mt-1">Método, materiales, lote, versión. Este campo + <b>Fecha de cierre</b> recalculan NPR’.</div>
+              <div class="text-[11px] text-slate-500 -mt-1">Método, materiales, lote, versión. Este campo + <b>Fecha de
+                  cierre</b> recalculan NPR’.</div>
               <textarea autoResize rows="3"
                 class="textarea textarea-bordered min-h-[96px] rounded-xl bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 leading-relaxed focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
                 formControlName="implementedAction" placeholder="Describe exactamente lo realizado…"></textarea>
@@ -237,8 +224,7 @@
             </label>
           </section>
 
-          <!-- NPR’ -->
-          <section aria-labelledby="npr" class="grid grid-cols-12 gap-6">
+          <section aria-labelledby="npr" class="grid grid-cols-12 gap-4 sm:gap-6">
             <h4 id="npr" class="col-span-12 text-[13px] font-semibold text-slate-700">NPR’</h4>
 
             <label class="form-control flex flex-col gap-1.5 sm:gap-2 col-span-12 sm:col-span-4">
@@ -269,7 +255,6 @@
       </div>
     </main>
 
-    <!-- ========== RESUMEN (DERECHA) ========== -->
     <aside class="col-span-12 xl:col-span-3">
       <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div class="p-6 space-y-5" [formGroup]="form">
@@ -311,9 +296,12 @@
           <div class="divider my-2"></div>
 
           <div class="grid gap-2">
-            <button class="btn bg-[#153e75] hover:bg-black text-white" (click)="save()" [disabled]="saving()">Guardar</button>
-            <button class="btn btn-outline border-slate-300 text-slate-800" (click)="newAction()">Nueva</button>
-            <button class="btn btn-outline border-red-200 text-red-700 hover:bg-red-600 hover:text-white" (click)="delete()" [disabled]="!form.value.id">Eliminar</button>
+            <button class="btn bg-[#153e75] hover:bg-black text-white rounded-xl" (click)="save()"
+              [disabled]="saving()">Guardar</button>
+            <button class="btn btn-outline border-slate-300 text-slate-800 rounded-xl"
+              (click)="newAction()">Nueva</button>
+            <button class="btn btn-outline border-red-200 text-red-700 hover:bg-red-600 hover:text-white rounded-xl"
+              (click)="delete()" [disabled]="!form.value.id">Eliminar</button>
           </div>
 
           <div class="divider my-2"></div>
@@ -328,7 +316,7 @@
                 <li>Valora S′/O′/D′ con la misma escala del análisis.</li>
               </ol>
 
-              <div class="grid grid-cols-3 gap-2">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <div class="p-2 rounded bg-white border">
                   <div class="font-semibold text-slate-700">S′ (Severidad)</div>
                   <div>9–10 peligro/norma · 7–8 muy insatisfecho · 5–6 degradación · 3–4 leve · 1–2 mínimo.</div>
@@ -339,7 +327,8 @@
                 </div>
                 <div class="p-2 rounded bg-white border">
                   <div class="font-semibold text-slate-700">D′ (Detección)</div>
-                  <div>9–10 sin método · 7–8 alta no-detección · 5–6 moderada · 3–4 baja · 1–2 detecta casi seguro.</div>
+                  <div>9–10 sin método · 7–8 alta no-detección · 5–6 moderada · 3–4 baja · 1–2 detecta casi seguro.
+                  </div>
                 </div>
               </div>
 
@@ -367,9 +356,9 @@
     </aside>
   </div>
 
-  <!-- ===================== TOAST ===================== -->
   <div class="fixed bottom-4 right-4 z-50" [class.hidden]="!toast()">
-    <div class="flex items-center gap-3 rounded-xl px-4 py-3 text-white shadow-lg ring-1 ring-black/5 transition-all duration-300"
+    <div
+      class="flex items-center gap-3 rounded-xl px-4 py-3 text-white shadow-lg ring-1 ring-black/5 transition-all duration-300"
       [ngClass]="{
         'bg-emerald-600': toast()?.kind === 'success',
         'bg-sky-600':     toast()?.kind === 'update',
@@ -392,14 +381,14 @@
       </svg>
       }
       <span class="text-sm font-medium truncate max-w-[56ch]">{{ toast()?.text }}</span>
-      <button type="button" class="ml-1 -mr-1 rounded-md/80 bg-white/10 hover:bg-white/20 px-1.5 py-1 text-xs" aria-label="Cerrar notificación" (click)="closeToast()">✕</button>
+      <button type="button" class="ml-1 -mr-1 rounded-md/80 bg-white/10 hover:bg-white/20 px-1.5 py-1 text-xs"
+        aria-label="Cerrar notificación" (click)="closeToast()">✕</button>
     </div>
   </div>
 
-  <!-- ===================== MODAL GUÍA ===================== -->
   <input type="checkbox" id="actions-guide-modal" class="modal-toggle" />
   <div class="modal">
-    <div class="modal-box max-w-4xl">
+    <div class="modal-box max-w-3xl sm:max-w-4xl">
       <div class="flex items-start justify-between mb-3">
         <h3 class="font-bold text-lg">Guía para definir y cerrar Acciones</h3>
         <label for="actions-guide-modal" class="btn btn-sm btn-ghost">✕</label>
@@ -413,7 +402,7 @@
         <li>Si <b>NPR’ ≥ NPR base</b>, re-plantea la acción.</li>
       </ol>
 
-      <div class="grid md:grid-cols-3 gap-3 mt-4 text-sm">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 text-sm">
         <div class="rounded-lg border p-3">
           <div class="font-semibold">Severidad S′</div>
           <ul class="mt-1 space-y-0.5">
@@ -446,7 +435,7 @@
         </div>
       </div>
 
-      <div class="mt-4 grid md:grid-cols-2 gap-3 text-sm">
+      <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
         <div class="rounded-lg border p-3 bg-slate-50">
           <div class="font-semibold mb-1">Ejemplo</div>
           <div><b>Recomendada:</b> Añadir poka-yoke de montaje del conector.</div>
@@ -470,4 +459,5 @@
     </div>
     <label class="modal-backdrop" for="actions-guide-modal"></label>
   </div>
+
 </div>

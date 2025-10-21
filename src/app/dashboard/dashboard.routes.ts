@@ -6,6 +6,7 @@ import { AnalysisComponent } from "./pages/analysis/analysis.component";
 import { ActionsComponent } from "./pages/actions/actions.component";
 import { GraphicsComponent } from "./pages/graphics/graphics.component";
 import { isAdminGuard } from "../auth/guard/isAdmin.guard";
+import { superAdminGuard } from "../auth/guard/super-admin.guard";
 
 
 export const dashBoardRoutes: Routes = [
@@ -21,7 +22,7 @@ export const dashBoardRoutes: Routes = [
         path: 'organizational-information',
         component: OrganizationalInformationComponent,
         canMatch: [
-          isAdminGuard
+          superAdminGuard
         ],
       },
       {

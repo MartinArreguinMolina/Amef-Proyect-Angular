@@ -3,16 +3,18 @@ import { Location } from '@angular/common';
 import {
   ChangeDetectionStrategy, Component, OnInit,
   Directive, ElementRef, HostListener,
-  computed, effect, inject, signal
+  computed, effect, inject, signal,
 } from '@angular/core';
 import {
   FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators
 } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { AmefService } from '../services/amef.service';
 import { of } from 'rxjs';
+import { map, distinctUntilChanged } from 'rxjs/operators';
 import { FormsErrorLabelComponent } from 'src/app/shared/forms-error-label/forms-error-label.component';
+import { NavbarComponent } from "src/app/shared/navbar/navbar.component";
 
 export interface AnalysisItem {
   id: string;
@@ -98,31 +100,35 @@ type ToastKind = 'success' | 'update' | 'delete' | 'error';
 @Component({
   selector: 'app-analysis',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AutoResizeTextareaDirective, FormsErrorLabelComponent, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, AutoResizeTextareaDirective, FormsErrorLabelComponent, RouterLink, NavbarComponent],
   templateUrl: './analysis.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AnalysisComponent implements OnInit {
-  constructor(private location: Location){}
+  constructor(private location: Location) {}
 
-  goToThePreviousPage(){
+  private fb     = inject(FormBuilder);
+  private route  = inject(ActivatedRoute);
+  private router = inject(Router);
+  private api    = inject(AmefService);
+
+  goToThePreviousPage() {
     this.location.back();
   }
 
+  /* ===== Tabs ===== */
   tab = signal<'def' | 'eval' | 'acc'>('def');
   setTab(t: 'def' | 'eval' | 'acc') { this.tab.set(t); }
   isTab(t: 'def' | 'eval' | 'acc') { return this.tab() === t; }
 
-  private fb = inject(FormBuilder);
-  private route = inject(ActivatedRoute);
-  private api = inject(AmefService);
+  /* ===== Estado ===== */
+  amefId      = signal<string>('');
+  search      = signal<string>('');            // lista siempre visible
+  selected    = signal<string | null>(null);   // al entrar: sin selección
+  saving      = signal<boolean>(false);
+  creatingNew = signal<boolean>(true);         // al entrar: modo "Nuevo"
 
-  amefId = signal<string>('');
-  search = signal<string>('');
-  selected = signal<string | null>(null);
-  saving = signal<boolean>(false);
-  creatingNew = signal<boolean>(false);
-
+  /* ===== Toast ===== */
   toast = signal<{ kind: ToastKind; text: string } | null>(null);
   private toastTimer?: any;
   private showToast(text: string, kind: ToastKind = 'success', ms = 2200) {
@@ -132,6 +138,7 @@ export class AnalysisComponent implements OnInit {
   }
   closeToast() { if (this.toastTimer) clearTimeout(this.toastTimer); this.toast.set(null); }
 
+  /* ===== Data remota ===== */
   analysesRes = rxResource<AnalysisItem[], string | null>({
     params: () => this.amefId() || null,
     stream: ({ params }) => params ? this.api.listAnalyses(params) : of([]),
@@ -145,15 +152,17 @@ export class AnalysisComponent implements OnInit {
       (a.systemFunction ?? '').toLowerCase().includes(q) ||
       (a.failureMode ?? '').toLowerCase().includes(q) ||
       (a.failureEffects ?? '').toLowerCase().includes(q) ||
-      (a.failureCauses ?? '').toLowerCase().includes(q)
+      (a.failureCauses ?? '').toLowerCase().includes(q) ||
+      (a.id ?? '').toLowerCase().includes(q)
     );
   });
 
+  /* ===== Form ===== */
   form: DetailForm = this.fb.group({
     id: this.fb.control<string | null>(null),
     systemFunction: this.fb.control<string>('', { nonNullable: true, validators: [Validators.required] }),
-    failureMode: this.fb.control<string>('', { nonNullable: true, validators: [Validators.required] }),
-    failureEffects: this.fb.control<string>('', { nonNullable: true, validators: [Validators.required] }),
+    failureMode: this.fb.control<string>('',   { nonNullable: true, validators: [Validators.required] }),
+    failureEffects: this.fb.control<string>('',{ nonNullable: true, validators: [Validators.required] }),
     failureCauses: this.fb.control<string>('', { nonNullable: true, validators: [Validators.required] }),
     currentControls: this.fb.control<string | null>(null),
     severity: this.fb.control<number | null>(null, { validators: [Validators.required, Validators.min(1), Validators.max(10)] }),
@@ -161,71 +170,6 @@ export class AnalysisComponent implements OnInit {
     detection: this.fb.control<number | null>(null, { validators: [Validators.required, Validators.min(1), Validators.max(10)] }),
     npr: this.fb.control<number | null>(null),
   });
-
-  private syncFormEffect = effect(() => {
-    const list = this.listFiltered();
-    const isCreating = this.creatingNew();
-    const current = this.selected();
-    if (isCreating) return;
-
-    const still = current && list.some(x => x.id === current);
-    const sel = still ? current! : (list[0]?.id ?? null);
-
-    if (!sel) { this.selected.set(null); this.form.reset(); return; }
-    if (sel !== current) this.selected.set(sel);
-
-    const item = list.find(x => x.id === sel);
-    if (!item) return;
-
-    this.form.setValue({
-      id: item.id,
-      systemFunction: item.systemFunction,
-      failureMode: item.failureMode,
-      failureEffects: item.failureEffects,
-      failureCauses: item.failureCauses,
-      currentControls: item.currentControls ?? null,
-      severity: item.severity,
-      occurrence: item.occurrence,
-      detection: item.detection,
-      npr: item.npr,
-    }, { emitEvent: false });
-  });
-
-  private nprEffect = effect(() => {
-    const s = Number(this.form.controls.severity.value ?? 0);
-    const o = Number(this.form.controls.occurrence.value ?? 0);
-    const d = Number(this.form.controls.detection.value ?? 0);
-    const npr = (s && o && d) ? s * o * d : null;
-    this.form.controls.npr.setValue(npr, { emitEvent: false });
-  });
-
-  get ap(): AP | null {
-    const v = this.form.value;
-    const s = Number(v.severity);
-    const o = Number(v.occurrence);
-    const d = Number(v.detection);
-    if (!s || !o || !d) return null;
-    return aiagVdaAP(s, o, d);
-  }
-
-  apText(ap: AP | null): string {
-    if (!ap) return '';
-    return ap === 'H' ? 'Alta' : ap === 'M' ? 'Media' : 'Baja';
-  }
-  apClass(ap: AP | null): string {
-    if (ap === 'H') return 'bg-red-100 text-red-800 border-red-200';
-    if (ap === 'M') return 'bg-amber-100 text-amber-800 border-amber-200';
-    if (ap === 'L') return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-    return 'bg-slate-100 text-slate-600 border-slate-200';
-  }
-
-  ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('amefId');
-    if (id) this.amefId.set(id);
-  }
-
-  setSearch(value: string) { this.search.set(value); }
-  select(id: string) { this.creatingNew.set(false); this.selected.set(id); }
 
   private resetFormBlank() {
     this.form.reset({
@@ -242,10 +186,144 @@ export class AnalysisComponent implements OnInit {
     });
   }
 
+  /* ===== NPR dinámico ===== */
+  private nprEffect = effect(() => {
+    const s = Number(this.form.controls.severity.value ?? 0);
+    const o = Number(this.form.controls.occurrence.value ?? 0);
+    const d = Number(this.form.controls.detection.value ?? 0);
+    const npr = (s && o && d) ? s * o * d : null;
+    this.form.controls.npr.setValue(npr, { emitEvent: false });
+  });
+
+  /* ===== Query param reactivo (LECTURA) =====
+     Usamos snapshot para el valor inicial y evitar parpadeos */
+  readonly analysisIdFromUrl = toSignal(
+    this.route.queryParamMap.pipe(
+      map(m => m.get('analysisId')),
+      distinctUntilChanged()
+    ),
+    { initialValue: this.route.snapshot.queryParamMap.get('analysisId') }
+  );
+
+  /**
+   * URL -> estado:
+   * - Si hay ?analysisId y la lista YA cargó y contiene ese id: seleccionar y salir de "Nuevo".
+   * - Si NO hay o es inválido (y ya no está loading): volver/seguir en "Nuevo".
+   * - IMPORTANT: no limpiar el queryParam mientras la lista está 'loading'
+   *   para evitar el false negative en carga inicial.
+   */
+  private urlSelectionEffect = effect(() => {
+    const urlId = this.analysisIdFromUrl();
+    const status = this.analysesRes.status?.() as ('loading' | 'ready' | 'error' | undefined);
+    const list = this.analysesRes.value() ?? [];
+
+    if (!urlId) {
+      // Sin param: modo nuevo (no forzamos si ya está nuevo)
+      this.creatingNew.set(true);
+      if (this.selected()) this.selected.set(null);
+      this.resetFormBlank();
+      return;
+    }
+
+    // Si aún está cargando, no tomes decisiones
+    if (status === 'loading') return;
+
+    const exists = list.some(it => it.id === urlId);
+    if (exists) {
+      if (this.selected() !== urlId) this.selected.set(urlId);
+      this.creatingNew.set(false);
+    } else {
+      // Id inválido y YA no está loading -> nuevo y limpia el param
+      this.creatingNew.set(true);
+      if (this.selected()) this.selected.set(null);
+      this.resetFormBlank();
+
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { analysisId: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }
+  });
+
+  /**
+   * Sincroniza el form cuando hay un seleccionado.
+   * Usa la lista COMPLETA (no la filtrada) para que el form no se "caiga"
+   * si el usuario filtra y oculta el seleccionado.
+   */
+  private syncFormEffect = effect(() => {
+    if (this.creatingNew()) return;
+
+    const all = this.analysesRes.value() ?? [];
+    const sel = this.selected();
+
+    if (!sel) { this.resetFormBlank(); return; }
+
+    const item = all.find(x => x.id === sel);
+    if (!item) {
+      // Si desapareció, vuelve a "Nuevo" y limpia URL
+      this.creatingNew.set(true);
+      this.selected.set(null);
+      this.resetFormBlank();
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { analysisId: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+      return;
+    }
+
+    this.form.setValue({
+      id: item.id,
+      systemFunction: item.systemFunction,
+      failureMode: item.failureMode,
+      failureEffects: item.failureEffects,
+      failureCauses: item.failureCauses,
+      currentControls: item.currentControls ?? null,
+      severity: item.severity,
+      occurrence: item.occurrence,
+      detection: item.detection,
+      npr: item.npr,
+    }, { emitEvent: false });
+  });
+
+  /* ===== Ciclo de vida ===== */
+  ngOnInit(): void {
+    const id = this.route.snapshot.paramMap.get('amefId');
+    if (id) this.amefId.set(id);
+    // creatingNew ya está en true por defecto; no forzamos nada aquí.
+  }
+
+  /* ===== UI / Handlers ===== */
+  setSearch(value: string) { this.search.set(value); }
+
+  /** Click en item -> escribe ?analysisId */
+  select(id: string) {
+    this.creatingNew.set(false);
+    this.selected.set(id);
+
+    this.router.navigate([], {
+      relativeTo: this.route,                 // si no ves cambio, usa: this.route.parent ?? this.route
+      queryParams: { analysisId: id },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  /** Nuevo -> limpia ?analysisId */
   newAnalysis() {
     this.creatingNew.set(true);
     this.selected.set(null);
     this.resetFormBlank();
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { analysisId: null },      // null elimina el parámetro
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   save() {
@@ -273,7 +351,18 @@ export class AnalysisComponent implements OnInit {
       next: (createdOrUpdated: any) => {
         this.saving.set(false);
         this.creatingNew.set(false);
-        if (createdOrUpdated?.id) this.selected.set(createdOrUpdated.id);
+
+        if (createdOrUpdated?.id) {
+          this.selected.set(createdOrUpdated.id);
+          // Asegura URL actualizado después de crear/actualizar
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { analysisId: createdOrUpdated.id },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+          });
+        }
+
         this.analysesRes.reload();
         this.showToast(wasCreate ? 'Análisis creado correctamente' : 'Análisis actualizado',
           wasCreate ? 'success' : 'update');
@@ -285,21 +374,51 @@ export class AnalysisComponent implements OnInit {
   delete() {
     const id = this.form.value.id;
     if (!id) return;
+
     this.api.deleteAnalysis(this.amefId(), id).subscribe({
       next: () => {
-        this.creatingNew.set(false);
+        this.creatingNew.set(true);
         this.selected.set(null);
         this.analysesRes.reload();
+        this.resetFormBlank();
+
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: { analysisId: null },
+          queryParamsHandling: 'merge',
+          replaceUrl: true,
+        });
+
         this.showToast('Análisis eliminado', 'delete');
       },
       error: () => this.showToast('No se pudo eliminar', 'error')
     });
   }
 
+  /* ===== Helper visual ===== */
   nprColor(npr: number | null) {
     if (!npr) return 'badge-ghost';
     if (npr >= 200) return 'bg-red-100 text-red-800 border-red-200';
     if (npr >= 100) return 'bg-amber-100 text-amber-800 border-amber-200';
     return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+  }
+
+  get ap(): AP | null {
+    const v = this.form.value;
+    const s = Number(v.severity);
+    const o = Number(v.occurrence);
+    const d = Number(v.detection);
+    if (!s || !o || !d) return null;
+    return aiagVdaAP(s, o, d);
+  }
+  apText(ap: AP | null): string {
+    if (!ap) return '';
+    return ap === 'H' ? 'Alta' : ap === 'M' ? 'Media' : 'Baja';
+  }
+  apClass(ap: AP | null): string {
+    if (ap === 'H') return 'bg-red-100 text-red-800 border-red-200';
+    if (ap === 'M') return 'bg-amber-100 text-amber-800 border-amber-200';
+    if (ap === 'L') return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+    return 'bg-slate-100 text-slate-600 border-amber-200';
   }
 }

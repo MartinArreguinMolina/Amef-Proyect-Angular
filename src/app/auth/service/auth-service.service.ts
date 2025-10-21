@@ -33,6 +33,9 @@ export class AuthService {
 
   rol = computed(() => (this._user()?.roles.includes('admin') || this._user()?.roles.includes('super-admin')) ?? false)
 
+  isSuperAdmin = computed(() => this._user()?.roles.includes('super-admin') ?? false)
+
+
   checkStatusResource = rxResource({
     stream: () => this.checkAuthStatus(),
   })

@@ -6,10 +6,11 @@ import { firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { FormsErrorLabelComponent } from "src/app/shared/forms-error-label/forms-error-label.component";
 import { FormUtils } from 'src/app/utils/form-utils';
+import { NotificationComponent } from 'src/app/shared/notification/notification.component';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, FormsErrorLabelComponent],
+  imports: [ReactiveFormsModule, FormsErrorLabelComponent, NotificationComponent],
   templateUrl: './login.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

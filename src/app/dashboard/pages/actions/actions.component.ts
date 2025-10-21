@@ -1,4 +1,4 @@
-import { AsyncPipe, CommonModule, Location } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import {
   ChangeDetectionStrategy, Component, OnInit,
   Directive, ElementRef, HostListener,
@@ -14,6 +14,7 @@ import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { AmefService, ActionItem, ActionCreateDto } from '../services/amef.service';
 import { FormsErrorLabelComponent } from 'src/app/shared/forms-error-label/forms-error-label.component';
 import { AuthService } from 'src/app/auth/service/auth-service.service';
+import { NavbarComponent } from "src/app/shared/navbar/navbar.component";
 
 /* ========= Auto-resize para <textarea> ========= */
 @Directive({ selector: 'textarea[autoResize]', standalone: true })
@@ -40,8 +41,8 @@ type ActionForm = FormGroup<{
   id: FormControl<string | null>;
 
   recommendedAction: FormControl<string>;
-  responsibleText: FormControl<string>;          // <- texto del input
-  responsible: FormControl<UserOption | null>;   // <- selección real
+  responsibleText: FormControl<string>;
+  responsible: FormControl<UserOption | null>;
   targetDate: FormControl<string>;
 
   implementedAction: FormControl<string | null>;
@@ -54,11 +55,10 @@ type ActionForm = FormGroup<{
 
 type ToastKind = 'success' | 'update' | 'delete' | 'error';
 
-/* ========= Componente ========= */
 @Component({
   selector: 'app-actions',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AutoResizeTextareaDirective, FormsErrorLabelComponent, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, AutoResizeTextareaDirective, FormsErrorLabelComponent, RouterLink, NavbarComponent],
   templateUrl: './actions.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -70,7 +70,7 @@ export class ActionsComponent implements OnInit {
   private auth = inject(AuthService);
 
   /* ====== UI / estado ====== */
-  resposibleError = signal<boolean>(false);
+  responsibleError = signal<boolean>(false);
   termSearch = signal<string>('');
   department = signal<string>('');
 
@@ -90,7 +90,11 @@ export class ActionsComponent implements OnInit {
     if (this.toastTimer) clearTimeout(this.toastTimer);
     this.toastTimer = setTimeout(() => this.toast.set(null), ms);
   }
-  closeToast() { if (this.toastTimer) clearTimeout(this.toastTimer); this.toast.set(null); }
+  closeToast() {
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = undefined;
+    this.toast.set(null);
+  }
 
   /* ====== Data remota ====== */
   departaments = rxResource({
@@ -103,8 +107,8 @@ export class ActionsComponent implements OnInit {
       (params.department && params.term)
         ? this.api.getUsersByDepartmentAndTerm(params.department, params.term)
         : (params.term && !params.department)
-            ? this.auth.getUserTerm(params.term)
-            : of([])
+          ? this.auth.getUserTerm(params.term)
+          : of([])
   });
 
   /* ====== Métricas NPR base ====== */
@@ -119,9 +123,9 @@ export class ActionsComponent implements OnInit {
     stream: ({ params }) => params ? this.api.getAnalysis(params.amefId, params.analysisId) : of(null)
   });
 
-  baseSeverity   = computed(() => this.analysisRes.value()?.severity   ?? 0);
+  baseSeverity = computed(() => this.analysisRes.value()?.severity ?? 0);
   baseOccurrence = computed(() => this.analysisRes.value()?.occurrence ?? 0);
-  baseDetection  = computed(() => this.analysisRes.value()?.detection  ?? 0);
+  baseDetection = computed(() => this.analysisRes.value()?.detection ?? 0);
   nprBefore = computed<number | null>(() => {
     const s = this.baseSeverity(), o = this.baseOccurrence(), d = this.baseDetection();
     return s && o && d ? s * o * d : null;
@@ -162,18 +166,17 @@ export class ActionsComponent implements OnInit {
 
     recommendedAction: this.fb.control<string>('', { nonNullable: true, validators: [Validators.required] }),
 
-    // 🔹 Campo visible (texto) + valor real seleccionado
     responsibleText: this.fb.control<string>('', { nonNullable: true }),
-    responsible:     this.fb.control<UserOption | null>(null),
+    responsible: this.fb.control<UserOption | null>(null),
 
     targetDate: this.fb.control<string>('', { nonNullable: true, validators: [Validators.required] }),
 
     implementedAction: this.fb.control<string | null>(null),
-    completionDate:   this.fb.control<string | null>(null),
+    completionDate: this.fb.control<string | null>(null),
 
-    newSeverity:   this.fb.control<number | null>(null, { validators: [Validators.min(1), Validators.max(10)] }),
+    newSeverity: this.fb.control<number | null>(null, { validators: [Validators.min(1), Validators.max(10)] }),
     newOccurrence: this.fb.control<number | null>(null, { validators: [Validators.min(1), Validators.max(10)] }),
-    newDetection:  this.fb.control<number | null>(null, { validators: [Validators.min(1), Validators.max(10)] }),
+    newDetection: this.fb.control<number | null>(null, { validators: [Validators.min(1), Validators.max(10)] }),
   });
 
   private formState = toSignal(this.form.valueChanges, {
@@ -213,22 +216,21 @@ export class ActionsComponent implements OnInit {
       id: item.id,
       recommendedAction: item.recommendedAction ?? '',
 
-      // Al cargar desde BD ponemos el texto y dejamos la selección real vacía
       responsibleText: item.responsible ?? '',
-      responsible: null,
+      responsible: item.responsible
+        ? { fullName: item.responsible }
+        : null,
 
       targetDate: item.targetDate ?? '',
-
       implementedAction: item.implementedAction ?? null,
       completionDate: item.completionDate ?? null,
-
       newSeverity: item.newSeverity ?? null,
       newOccurrence: item.newOccurrence ?? null,
       newDetection: item.newDetection ?? null,
     }, { emitEvent: true });
+
   });
 
-  /* ====== Ciclo de vida ====== */
   async ngOnInit() {
     const amefId = this.route.snapshot.paramMap.get('amefId');
     const analysisId = this.route.snapshot.paramMap.get('analysisId');
@@ -236,30 +238,28 @@ export class ActionsComponent implements OnInit {
     if (analysisId) this.analysisId.set(analysisId);
   }
 
-  /* ====== Navegación ====== */
+
   goToBack() { this.location.back(); }
 
-  /* ====== Filtros & búsqueda ====== */
+
   setSearch(v: string) { this.search.set(v); }
 
   changeSearch(term: string) {
     this.termSearch.set(term ?? '');
   }
 
-  changeDeparment(department: string) {
+  changeDepartment(department: string) {
     this.department.set(department ?? '');
   }
 
-  deleteFilterDeparment() {
+  clearDepartmentFilter() {
     this.department.set('');
   }
 
-  /* ====== Input Responsable: texto y sugerencias ====== */
   onResponsibleInput(term: string) {
     this.form.patchValue({ responsibleText: term });
-    this.resposibleError.set(false);
+    this.responsibleError.set(false);
     this.changeSearch(term);
-    // cada vez que cambia el texto, invalida selección previa
     this.form.patchValue({ responsible: null }, { emitEvent: false });
   }
 
@@ -297,9 +297,8 @@ export class ActionsComponent implements OnInit {
       return;
     }
 
-    // Validación mínima
     if (!this.form.value.responsible) {
-      this.resposibleError.set(true);
+      this.responsibleError.set(true);
       this.showToast('Selecciona un responsable de la lista', 'error');
       return;
     }
@@ -312,7 +311,7 @@ export class ActionsComponent implements OnInit {
 
     const dto: ActionCreateDto = {
       recommendedAction: this.form.value.recommendedAction!,
-      responsible: responsibleName, // API espera string
+      responsible: responsibleName,
       targetDate: this.form.value.targetDate!,
       ...(this.form.value.implementedAction ? { implementedAction: this.form.value.implementedAction } : {}),
       ...(this.form.value.completionDate ? { completionDate: this.form.value.completionDate } : {}),

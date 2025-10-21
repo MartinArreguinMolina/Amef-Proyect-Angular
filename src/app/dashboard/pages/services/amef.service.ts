@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environments } from '@env/environmets';
-import { Amef, AnalysisDto } from '../../interfaces/interfaces';
+import { Amef, AmefPatch, AnalysisDto } from '../../interfaces/interfaces';
 import { AnalysisItem, CreateAnalysisPayload, UpdateAnalysisPayload } from '../analysis/analysis.component';
 import { Observable, delay } from 'rxjs';
 import { UserReponse } from '@interfaces/interfaces';
@@ -40,6 +40,7 @@ export class AmefService {
   private http = inject(HttpClient);
   private baseUrl = environments.baseUlr;
 
+
   getUsersByDepartmentAndTerm(department: string, user: string){
     return this.http.get<UserReponse[]>(`${this.baseUrl}/auth/department/${department}/user/${user}`)
   }
@@ -48,16 +49,40 @@ export class AmefService {
     return this.http.get<{id: string, department: string}[]>(`${this.baseUrl}/departments/${term}`)
   }
 
+  getTeamByTerm(id: string, term: string){
+    return this.http.get<Amef[]>(`${this.baseUrl}/organizational-information/amef/${id}/term/${term}`).pipe(
+      delay(500)
+    )
+  }
+
+  getAmefsByTeam(id: string){
+    return this.http.get<Amef[]>(`${this.baseUrl}/organizational-information/amef/team/${id}`).pipe(
+      delay(500)
+    )
+  }
+
   createOrganizationalInformation(body: {}) {
     return this.http.post(`${this.baseUrl}/organizational-information`, body);
   }
 
+  updateAmef(id: string, body: {}){
+    return this.http.patch(`${this.baseUrl}/organizational-information/${id}`, body)
+  }
+
+  getAmefById(id: string){
+    return this.http.get<AmefPatch>(`${this.baseUrl}/organizational-information/id/${id}`)
+  }
+
   getAmefsByIdAndTerm(id: string, term: string){
-    return this.http.get<Amef[]>(`${this.baseUrl}/organizational-information/${id}/term/${term}`)
+    return this.http.get<Amef[]>(`${this.baseUrl}/organizational-information/${id}/term/${term}`).pipe(
+      delay(500)
+    )
   }
 
   getAmefsById(id: string){
-    return this.http.get<Amef[]>(`${this.baseUrl}/organizational-information/${id}`)
+    return this.http.get<Amef[]>(`${this.baseUrl}/organizational-information/${id}`).pipe(
+      delay(500)
+    )
   }
 
   getAmefs() {

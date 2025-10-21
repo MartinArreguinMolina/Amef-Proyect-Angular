@@ -8,20 +8,22 @@ import { AuthService } from 'src/app/auth/service/auth-service.service';
 import { environments } from '@env/environmets';
 import { AmefCardComponent } from "../../components/amef-card/amef-card.component";
 import { AmefCardNotFoundComponent } from '../../components/amef-card-not-found/amef-card-not-found.component';
+import { LoaderComponent } from "src/app/shared/loader/loader.component";
+import { NavbarComponent } from "src/app/shared/navbar/navbar.component";
 
 @Component({
   selector: 'app-amef',
-  standalone: true,
-  imports: [RouterLink, AmefCardComponent, AmefCardNotFoundComponent],
+  imports: [RouterLink, AmefCardComponent, AmefCardNotFoundComponent, LoaderComponent, NavbarComponent],
   templateUrl: './amef.component.html',
 })
 export class AmefComponent {
-  authService = inject(AuthService)
   baseUrlPdf = environments.baseUrlPdf;
+  authService = inject(AuthService)
   private amefService = inject(AmefService);
-  filter = signal<string>('')
 
+  filter = signal<string>('')
   userId = signal<string>(this.authService.user()!.id)
+  term = signal<string>('')
 
 
   changeFilter(filter: string) {
@@ -33,6 +35,15 @@ export class AmefComponent {
     this.filter.set(filter)
   }
 
+
+  changeterm(term: string){
+    if(!term){
+      this.term.set('')
+      return;
+    }
+    this.term.set(term)
+  }
+
   amefs = rxResource({
     params: () => {
       return { filter: this.filter(), userId: this.userId()}
@@ -41,6 +52,17 @@ export class AmefComponent {
       if (params.filter) return this.amefService.getAmefsByIdAndTerm(params.userId, params.filter)
 
       return this.amefService.getAmefsById(params.userId)
+    }
+  })
+
+  amefsByTeam = rxResource({
+    params: () => {
+      return {id: this.authService.user()!.id, term: this.term()}
+    },
+    stream: ({params}) => {
+      if(!params.term) return this.amefService.getAmefsByTeam(params.id)
+
+        return this.amefService.getTeamByTerm(params.id, params.term)
     }
   })
 }

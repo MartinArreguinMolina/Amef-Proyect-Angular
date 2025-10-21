@@ -51,7 +51,7 @@
                 <input type="email" placeholder="Correo Electrónico"
                   class="input w-full pl-4 bg-white/70 border-gray-300/80 placeholder-gray-500 text-gray-800 focus:border-cyan-400 focus:ring focus:ring-cyan-300 focus:ring-opacity-50"
                   formControlName="email" required />
-                  <forms-error-label [control]="this.login.get('email')!"/>
+                <forms-error-label [control]="this.login.get('email')!" />
               </div>
 
               <div class="relative">
@@ -82,13 +82,5 @@
 </div>
 
 @if(this.credentialError()){
-<div class="fixed top-5 right-4">
-  <div role="alert" class="alert alert-error">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-    <span>Credenciales invalidas, verifica tu informacion</span>
-  </div>
-</div>
+  <message-notification title="Error de credenciales invalida" subtitle="verifica tu informacion" [error]="true"/>
 }

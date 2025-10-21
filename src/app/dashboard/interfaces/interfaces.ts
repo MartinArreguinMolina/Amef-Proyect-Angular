@@ -1,3 +1,4 @@
+import { UserReponse } from "@interfaces/interfaces";
 
 export interface Amef {
   amefId: string,
@@ -13,6 +14,18 @@ export interface Amef {
   preparedBy: PreparedBy
 }
 
+export interface AmefPatch {
+  amefId: string,
+  revision: number,
+  team: UserReponse[],
+  system: null | string,
+  subsystem: null | string,
+  component: null | string,
+  proyectCode: string,
+  leadingDepartment: string,
+  dateOfOrigin: string,
+  targetDate: string,
+}
 
 export interface PreparedBy {
   id: string,
@@ -36,13 +49,13 @@ export interface AnalysisDto {
 }
 
 
-export interface ActionDto{
+export interface ActionDto {
   recommendedAction: string;
-  responsible:       string;
-  targetDate:        string;
+  responsible: string;
+  targetDate: string;
   implementedAction: string;
-  completionDate:    string;
-  newSeverity:       number;
-  newOccurrence:     number;
-  newDetection:      number;
+  completionDate: string;
+  newSeverity: number;
+  newOccurrence: number;
+  newDetection: number;
 }

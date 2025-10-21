@@ -24,6 +24,9 @@ export class FormUtils {
   static getTextError(errors: ValidationErrors) {
     for (const key of Object.keys(errors)) {
       switch (key) {
+        case 'selectionInvalid':
+          return 'Debes de seleccionar un departamento lider valido'
+
         case 'max':
           return 'El valor maximo que se puede ingresar es 10'
 
