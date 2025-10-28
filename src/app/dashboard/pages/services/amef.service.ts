@@ -35,6 +35,30 @@ export interface ActionCreateDto {
   newDetection?: number;
 }
 
+
+export interface Comment {
+  id: string
+  comment: string;
+  date: string,
+  modificationDate: string,
+  user: Userplane
+}
+
+export interface Userplane {
+  id: string
+  fullName: string,
+  email: string,
+  department: string,
+  rol: string,
+}
+
+export interface DtoComments {
+  userUuid: string,
+  comment: string,
+  analysisUuid: string,
+  date: string,
+}
+
 @Injectable({ providedIn: 'root' })
 export class AmefService {
   private http = inject(HttpClient);
@@ -141,5 +165,38 @@ export class AmefService {
     return this.http.get<{ severity: number; occurrence: number; detection: number }>(
       `${this.baseUrl}/amef/${amefId}/analysis/${analysisId}`
     );
+  }
+
+  // COMENTARIOS
+  getCommentsById(id: string){
+    return this.http.get<Comment[]>(`${this.baseUrl}/comments/${id}`).pipe(
+      delay(300)
+    )
+  }
+
+  getCommentsByIdAndTerm(id: string, term: string){
+    return this.http.get<Comment[]>(`${this.baseUrl}/comments/${id}/${term}`).pipe(
+      delay(300)
+    )
+  }
+
+  getCommentsByUserId(id: string, analysisId: string){
+    return this.http.get<Comment[]>(`${this.baseUrl}/comments/user/${id}/analysisId/${analysisId}`).pipe(
+      delay(300)
+    )
+  }
+
+  getCommentsByUserIdAndTerm(id: string, analysisId: string, term: string){
+    return this.http.get<Comment[]>(`${this.baseUrl}/comments/user/${id}/analysisId/${analysisId}/${term}`).pipe(
+      delay(300)
+    )
+  }
+
+  createComment(commentDto: DtoComments){
+    return this.http.post(`${this.baseUrl}/comments`, commentDto)
+  }
+
+  updateComment(id: string, body: {}){
+    return this.http.patch(`${this.baseUrl}/comments/${id}`, body)
   }
 }

@@ -4,7 +4,6 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { environments } from '@env/environmets';
 import { Login, UserReponse } from '@interfaces/interfaces';
 import { catchError, delay, map, of } from 'rxjs';
-import { Router } from '@angular/router';
 
 type AuthStatus = 'checking' | 'authenticated' | 'not-authenticated';
 

@@ -11,10 +11,13 @@ import {
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { AmefService } from '../services/amef.service';
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
 import { FormsErrorLabelComponent } from 'src/app/shared/forms-error-label/forms-error-label.component';
 import { NavbarComponent } from "src/app/shared/navbar/navbar.component";
+import { AuthService } from 'src/app/auth/service/auth-service.service';
+import { DateFormater } from 'src/app/utils/dateFormatter';
+import { LoaderComponent } from "src/app/shared/loader/loader.component";
 
 export interface AnalysisItem {
   id: string;
@@ -100,35 +103,41 @@ type ToastKind = 'success' | 'update' | 'delete' | 'error';
 @Component({
   selector: 'app-analysis',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AutoResizeTextareaDirective, FormsErrorLabelComponent, RouterLink, NavbarComponent],
+  imports: [CommonModule, ReactiveFormsModule, AutoResizeTextareaDirective, FormsErrorLabelComponent, RouterLink, NavbarComponent, LoaderComponent],
   templateUrl: './analysis.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AnalysisComponent implements OnInit {
-  constructor(private location: Location) {}
+  constructor(private location: Location) { }
 
-  private fb     = inject(FormBuilder);
-  private route  = inject(ActivatedRoute);
+  private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private api    = inject(AmefService);
+  private api = inject(AmefService);
+  private authService = inject(AuthService);
+
+  userId = computed(() => this.authService.user()?.id)
 
   goToThePreviousPage() {
     this.location.back();
   }
 
-  /* ===== Tabs ===== */
+
   tab = signal<'def' | 'eval' | 'acc'>('def');
   setTab(t: 'def' | 'eval' | 'acc') { this.tab.set(t); }
   isTab(t: 'def' | 'eval' | 'acc') { return this.tab() === t; }
+  amefId = signal<string>('');
+  search = signal<string>('');
+  selected = signal<string | null>(null);
+  saving = signal<boolean>(false);
+  creatingNew = signal<boolean>(true);
+  comment = signal<string>('')
+  sendCommentSucces = signal<boolean>(false)
+  commentId = signal<string>('')
+  searchCommentByUser = signal<string>('')
+  searchComment = signal<string>('')
 
-  /* ===== Estado ===== */
-  amefId      = signal<string>('');
-  search      = signal<string>('');            // lista siempre visible
-  selected    = signal<string | null>(null);   // al entrar: sin selección
-  saving      = signal<boolean>(false);
-  creatingNew = signal<boolean>(true);         // al entrar: modo "Nuevo"
 
-  /* ===== Toast ===== */
   toast = signal<{ kind: ToastKind; text: string } | null>(null);
   private toastTimer?: any;
   private showToast(text: string, kind: ToastKind = 'success', ms = 2200) {
@@ -138,7 +147,7 @@ export class AnalysisComponent implements OnInit {
   }
   closeToast() { if (this.toastTimer) clearTimeout(this.toastTimer); this.toast.set(null); }
 
-  /* ===== Data remota ===== */
+
   analysesRes = rxResource<AnalysisItem[], string | null>({
     params: () => this.amefId() || null,
     stream: ({ params }) => params ? this.api.listAnalyses(params) : of([]),
@@ -157,12 +166,11 @@ export class AnalysisComponent implements OnInit {
     );
   });
 
-  /* ===== Form ===== */
   form: DetailForm = this.fb.group({
     id: this.fb.control<string | null>(null),
     systemFunction: this.fb.control<string>('', { nonNullable: true, validators: [Validators.required] }),
-    failureMode: this.fb.control<string>('',   { nonNullable: true, validators: [Validators.required] }),
-    failureEffects: this.fb.control<string>('',{ nonNullable: true, validators: [Validators.required] }),
+    failureMode: this.fb.control<string>('', { nonNullable: true, validators: [Validators.required] }),
+    failureEffects: this.fb.control<string>('', { nonNullable: true, validators: [Validators.required] }),
     failureCauses: this.fb.control<string>('', { nonNullable: true, validators: [Validators.required] }),
     currentControls: this.fb.control<string | null>(null),
     severity: this.fb.control<number | null>(null, { validators: [Validators.required, Validators.min(1), Validators.max(10)] }),
@@ -186,7 +194,115 @@ export class AnalysisComponent implements OnInit {
     });
   }
 
-  /* ===== NPR dinámico ===== */
+  // COMENTARIOS
+  changeSearchTermByUser(term: string){
+    if(!term){
+      this.searchCommentByUser.set('')
+      return;
+    }
+
+    this.searchCommentByUser.set(term)
+  }
+
+  changeSearchTerm(term: string){
+    if(!term){
+      this.searchComment.set('')
+      return;
+    }
+
+    this.searchComment.set(term)
+  }
+
+  selectCommentId(id: string){
+    this.commentId.set(id)
+  }
+
+  async sendCommentChange(id: string, comment: string){
+    const currentComment = await firstValueFrom(this.api.updateComment(id, {
+      comment:comment,
+      modificationDate: new Date().toISOString()
+    }))
+
+      if(currentComment){
+      this.comments.reload()
+      this.commentsByUser.reload()
+      this.sendCommentSucces.set(true);
+      setTimeout(() => {
+        this.sendCommentSucces.set(false);
+      }, 3000)
+    }
+  }
+
+  comments = rxResource({
+    params: () => {
+      const analysisId = this.selected()
+      const term = this.searchComment()
+
+      return { analysisId, term }
+    },
+    stream: ({ params }) => {
+      if (!params.analysisId) return of([])
+
+      if(params.analysisId && params.term) return this.api.getCommentsByIdAndTerm(params.analysisId, params.term)
+
+      return this.api.getCommentsById(params.analysisId)
+    }
+  })
+
+  commentsByUser = rxResource({
+    params: () => {
+      const analysisId = this.selected()
+      const userID = this.authService.user()?.id;
+      const term = this.searchCommentByUser()
+
+      return { userID , analysisId, term}
+    },
+    stream: ({ params }) => {
+      if (!params.userID || !params.analysisId) return of([])
+
+      if(params.userID && params.analysisId && params.term) return this.api.getCommentsByUserIdAndTerm(params.userID, params.analysisId, params.term)
+
+      return this.api.getCommentsByUserId(params.userID, params.analysisId)
+    }
+  })
+
+  changeComment(comment: string) {
+    if (!comment) {
+      this.comment.set('')
+      return;
+    }
+
+    this.comment.set(comment)
+  }
+
+  async sendComment() {
+
+    console.log(DateFormater.getDDMMMMYYYY(new Date().toLocaleDateString()))
+
+    if (!this.comment()) return;
+
+    const comment = await firstValueFrom(this.api.createComment({
+      analysisUuid: this.form.value.id,
+      date: new Date().toISOString(),
+      comment: this.comment(),
+      userUuid: this.authService.user()!.id,
+    } as any))
+
+    if (comment) {
+      this.comments.reload()
+      this.commentsByUser.reload()
+      this.comment.set('')
+
+      this.sendCommentSucces.set(true);
+
+      setTimeout(() => {
+        this.sendCommentSucces.set(false);
+      }, 3000)
+
+    }
+  }
+  // COMENTARIOS
+
   private nprEffect = effect(() => {
     const s = Number(this.form.controls.severity.value ?? 0);
     const o = Number(this.form.controls.occurrence.value ?? 0);
@@ -195,8 +311,6 @@ export class AnalysisComponent implements OnInit {
     this.form.controls.npr.setValue(npr, { emitEvent: false });
   });
 
-  /* ===== Query param reactivo (LECTURA) =====
-     Usamos snapshot para el valor inicial y evitar parpadeos */
   readonly analysisIdFromUrl = toSignal(
     this.route.queryParamMap.pipe(
       map(m => m.get('analysisId')),
@@ -205,27 +319,18 @@ export class AnalysisComponent implements OnInit {
     { initialValue: this.route.snapshot.queryParamMap.get('analysisId') }
   );
 
-  /**
-   * URL -> estado:
-   * - Si hay ?analysisId y la lista YA cargó y contiene ese id: seleccionar y salir de "Nuevo".
-   * - Si NO hay o es inválido (y ya no está loading): volver/seguir en "Nuevo".
-   * - IMPORTANT: no limpiar el queryParam mientras la lista está 'loading'
-   *   para evitar el false negative en carga inicial.
-   */
   private urlSelectionEffect = effect(() => {
     const urlId = this.analysisIdFromUrl();
     const status = this.analysesRes.status?.() as ('loading' | 'ready' | 'error' | undefined);
     const list = this.analysesRes.value() ?? [];
 
     if (!urlId) {
-      // Sin param: modo nuevo (no forzamos si ya está nuevo)
       this.creatingNew.set(true);
       if (this.selected()) this.selected.set(null);
       this.resetFormBlank();
       return;
     }
 
-    // Si aún está cargando, no tomes decisiones
     if (status === 'loading') return;
 
     const exists = list.some(it => it.id === urlId);
@@ -233,7 +338,6 @@ export class AnalysisComponent implements OnInit {
       if (this.selected() !== urlId) this.selected.set(urlId);
       this.creatingNew.set(false);
     } else {
-      // Id inválido y YA no está loading -> nuevo y limpia el param
       this.creatingNew.set(true);
       if (this.selected()) this.selected.set(null);
       this.resetFormBlank();
@@ -247,11 +351,6 @@ export class AnalysisComponent implements OnInit {
     }
   });
 
-  /**
-   * Sincroniza el form cuando hay un seleccionado.
-   * Usa la lista COMPLETA (no la filtrada) para que el form no se "caiga"
-   * si el usuario filtra y oculta el seleccionado.
-   */
   private syncFormEffect = effect(() => {
     if (this.creatingNew()) return;
 
@@ -262,7 +361,6 @@ export class AnalysisComponent implements OnInit {
 
     const item = all.find(x => x.id === sel);
     if (!item) {
-      // Si desapareció, vuelve a "Nuevo" y limpia URL
       this.creatingNew.set(true);
       this.selected.set(null);
       this.resetFormBlank();
@@ -289,30 +387,25 @@ export class AnalysisComponent implements OnInit {
     }, { emitEvent: false });
   });
 
-  /* ===== Ciclo de vida ===== */
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('amefId');
     if (id) this.amefId.set(id);
-    // creatingNew ya está en true por defecto; no forzamos nada aquí.
   }
 
-  /* ===== UI / Handlers ===== */
   setSearch(value: string) { this.search.set(value); }
 
-  /** Click en item -> escribe ?analysisId */
   select(id: string) {
     this.creatingNew.set(false);
     this.selected.set(id);
 
     this.router.navigate([], {
-      relativeTo: this.route,                 // si no ves cambio, usa: this.route.parent ?? this.route
+      relativeTo: this.route,
       queryParams: { analysisId: id },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
   }
 
-  /** Nuevo -> limpia ?analysisId */
   newAnalysis() {
     this.creatingNew.set(true);
     this.selected.set(null);
@@ -320,7 +413,7 @@ export class AnalysisComponent implements OnInit {
 
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { analysisId: null },      // null elimina el parámetro
+      queryParams: { analysisId: null },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
@@ -354,7 +447,6 @@ export class AnalysisComponent implements OnInit {
 
         if (createdOrUpdated?.id) {
           this.selected.set(createdOrUpdated.id);
-          // Asegura URL actualizado después de crear/actualizar
           this.router.navigate([], {
             relativeTo: this.route,
             queryParams: { analysisId: createdOrUpdated.id },
@@ -395,7 +487,6 @@ export class AnalysisComponent implements OnInit {
     });
   }
 
-  /* ===== Helper visual ===== */
   nprColor(npr: number | null) {
     if (!npr) return 'badge-ghost';
     if (npr >= 200) return 'bg-red-100 text-red-800 border-red-200';
