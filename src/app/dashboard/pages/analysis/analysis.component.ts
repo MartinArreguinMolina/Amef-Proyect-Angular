@@ -4,6 +4,7 @@ import {
   ChangeDetectionStrategy, Component, OnInit,
   Directive, ElementRef, HostListener,
   computed, effect, inject, signal,
+  OnDestroy,
 } from '@angular/core';
 import {
   FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators
@@ -14,10 +15,9 @@ import { AmefService } from '../services/amef.service';
 import { firstValueFrom, of } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
 import { FormsErrorLabelComponent } from 'src/app/shared/forms-error-label/forms-error-label.component';
-import { NavbarComponent } from "src/app/shared/navbar/navbar.component";
 import { AuthService } from 'src/app/auth/service/auth-service.service';
-import { DateFormater } from 'src/app/utils/dateFormatter';
-import { LoaderComponent } from "src/app/shared/loader/loader.component";
+import { Header } from "../../components/header/header";
+
 
 export interface AnalysisItem {
   id: string;
@@ -103,17 +103,17 @@ type ToastKind = 'success' | 'update' | 'delete' | 'error';
 @Component({
   selector: 'app-analysis',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AutoResizeTextareaDirective, FormsErrorLabelComponent, RouterLink, NavbarComponent, LoaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, AutoResizeTextareaDirective, FormsErrorLabelComponent, RouterLink, Header],
   templateUrl: './analysis.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AnalysisComponent implements OnInit {
+export class AnalysisComponent implements OnInit, OnDestroy {
   constructor(private location: Location) { }
 
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private api = inject(AmefService);
+  api = inject(AmefService);
   private authService = inject(AuthService);
 
   userId = computed(() => this.authService.user()?.id)
@@ -121,7 +121,6 @@ export class AnalysisComponent implements OnInit {
   goToThePreviousPage() {
     this.location.back();
   }
-
 
   tab = signal<'def' | 'eval' | 'acc'>('def');
   setTab(t: 'def' | 'eval' | 'acc') { this.tab.set(t); }
@@ -136,6 +135,7 @@ export class AnalysisComponent implements OnInit {
   commentId = signal<string>('')
   searchCommentByUser = signal<string>('')
   searchComment = signal<string>('')
+  numberNewComments = signal<number>(0)
 
 
   toast = signal<{ kind: ToastKind; text: string } | null>(null);
@@ -153,10 +153,13 @@ export class AnalysisComponent implements OnInit {
     stream: ({ params }) => params ? this.api.listAnalyses(params) : of([]),
   });
 
+
   listFiltered = computed<AnalysisItem[]>(() => {
     const list = this.analysesRes.value() ?? [];
     const q = this.search().trim().toLowerCase();
+
     if (!q) return list;
+
     return list.filter(a =>
       (a.systemFunction ?? '').toLowerCase().includes(q) ||
       (a.failureMode ?? '').toLowerCase().includes(q) ||
@@ -193,115 +196,6 @@ export class AnalysisComponent implements OnInit {
       npr: null,
     });
   }
-
-  // COMENTARIOS
-  changeSearchTermByUser(term: string){
-    if(!term){
-      this.searchCommentByUser.set('')
-      return;
-    }
-
-    this.searchCommentByUser.set(term)
-  }
-
-  changeSearchTerm(term: string){
-    if(!term){
-      this.searchComment.set('')
-      return;
-    }
-
-    this.searchComment.set(term)
-  }
-
-  selectCommentId(id: string){
-    this.commentId.set(id)
-  }
-
-  async sendCommentChange(id: string, comment: string){
-    const currentComment = await firstValueFrom(this.api.updateComment(id, {
-      comment:comment,
-      modificationDate: new Date().toISOString()
-    }))
-
-      if(currentComment){
-      this.comments.reload()
-      this.commentsByUser.reload()
-      this.sendCommentSucces.set(true);
-      setTimeout(() => {
-        this.sendCommentSucces.set(false);
-      }, 3000)
-    }
-  }
-
-  comments = rxResource({
-    params: () => {
-      const analysisId = this.selected()
-      const term = this.searchComment()
-
-      return { analysisId, term }
-    },
-    stream: ({ params }) => {
-      if (!params.analysisId) return of([])
-
-      if(params.analysisId && params.term) return this.api.getCommentsByIdAndTerm(params.analysisId, params.term)
-
-      return this.api.getCommentsById(params.analysisId)
-    }
-  })
-
-  commentsByUser = rxResource({
-    params: () => {
-      const analysisId = this.selected()
-      const userID = this.authService.user()?.id;
-      const term = this.searchCommentByUser()
-
-      return { userID , analysisId, term}
-    },
-    stream: ({ params }) => {
-      if (!params.userID || !params.analysisId) return of([])
-
-      if(params.userID && params.analysisId && params.term) return this.api.getCommentsByUserIdAndTerm(params.userID, params.analysisId, params.term)
-
-      return this.api.getCommentsByUserId(params.userID, params.analysisId)
-    }
-  })
-
-  changeComment(comment: string) {
-    if (!comment) {
-      this.comment.set('')
-      return;
-    }
-
-    this.comment.set(comment)
-  }
-
-  async sendComment() {
-
-    console.log(DateFormater.getDDMMMMYYYY(new Date().toLocaleDateString()))
-
-    if (!this.comment()) return;
-
-    const comment = await firstValueFrom(this.api.createComment({
-      analysisUuid: this.form.value.id,
-      date: new Date().toISOString(),
-      comment: this.comment(),
-      userUuid: this.authService.user()!.id,
-    } as any))
-
-    if (comment) {
-      this.comments.reload()
-      this.commentsByUser.reload()
-      this.comment.set('')
-
-      this.sendCommentSucces.set(true);
-
-      setTimeout(() => {
-        this.sendCommentSucces.set(false);
-      }, 3000)
-
-    }
-  }
-  // COMENTARIOS
 
   private nprEffect = effect(() => {
     const s = Number(this.form.controls.severity.value ?? 0);
@@ -387,9 +281,33 @@ export class AnalysisComponent implements OnInit {
     }, { emitEvent: false });
   });
 
-  ngOnInit(): void {
+  private x = effect(() => {
+    this.api.jointCommentRoom(this.analysisIdFromUrl()!)
+    const count = this.api.numberNewComments()
+
+    if (count.get(this.analysisIdFromUrl()!)! > 0) {
+      console.log(count.get(this.analysisIdFromUrl()!)!)
+      this.numberNewComments.set(count.get(this.analysisIdFromUrl()!)!)
+    } else {
+      this.numberNewComments.set(0)
+    }
+  })
+
+  async ngOnInit() {
+    this.api.jointCommentRoom(this.analysisIdFromUrl()!)
+    const count = this.api.numberNewComments()
+
+    if (count.get(this.analysisIdFromUrl()!)! > 0) {
+      console.log(count.get(this.analysisIdFromUrl()!)!)
+      this.numberNewComments.set(count.get(this.analysisIdFromUrl()!)!)
+    }
+
     const id = this.route.snapshot.paramMap.get('amefId');
     if (id) this.amefId.set(id);
+  }
+
+  ngOnDestroy(): void {
+    this.api.disconnect()
   }
 
   setSearch(value: string) { this.search.set(value); }

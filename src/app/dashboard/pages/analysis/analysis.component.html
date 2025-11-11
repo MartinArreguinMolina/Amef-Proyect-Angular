@@ -1,26 +1,7 @@
-<app-navbar />
 <div class="min-h-dvh bg-gradient-to-b from-white to-slate-50 text-slate-800" data-theme="light">
   <div class="h-1 bg-gradient-to-r from-[#153e75] via-black to-[#153e75]"></div>
-
-  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
-    <div class="h-0.5 bg-gradient-to-r from-[#153e75] via-black to-[#153e75]"></div>
-    <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 xl:px-10 h-14 sm:h-16 flex items-center justify-between">
-      <nav class="breadcrumbs text-xs sm:text-sm text-slate-500 truncate">
-        <ul>
-          <li routerLink="/"><a
-              class="hover:text-black focus:outline-none focus:ring-2 focus:ring-[#153e75]/30 rounded">Inicio</a></li>
-          <li routerLink="/dashboard"><a
-              class="hover:text-black focus:outline-none focus:ring-2 focus:ring-[#153e75]/30 rounded">AMEFs</a></li>
-          <li class="text-slate-800 font-semibold">Analysis</li>
-        </ul>
-      </nav>
-      <label for="guide-modal" class="btn btn-xs sm:btn-sm btn-outline rounded-xl">Guía</label>
-    </div>
-  </header>
-
-  <!-- Zona principal -->
+  <app-header />
   <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 xl:px-10 py-6 grid grid-cols-12 gap-6">
-    <!-- LISTA -->
     <aside class="col-span-12 md:col-span-4 xl:col-span-3">
       <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div class="p-3 sm:p-4 border-b border-slate-200 flex items-center gap-2">
@@ -31,13 +12,9 @@
                 d="m21 21-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" />
             </svg>
             <input #q
-              class="input input-sm input-bordered w-full pl-9 pr-10 bg-white text-slate-900 placeholder:text-slate-500 placeholder:text-[12px] sm:placeholder:text-[13px] border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20 rounded-xl"
-              placeholder="Buscar (modo, función, efectos, causas)…" [value]="search()" (input)="setSearch(q.value)" />
-            <span
-              class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-slate-400 hidden sm:block">⌘K</span>
+              class="input input-bordered w-full pl-9 pr-10 bg-white text-slate-900 placeholder:text-slate-500 placeholder:text-[12px] sm:placeholder:text-[13px] border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
+              placeholder="Buscar (modo, función, efectos, causas)" [value]="search()" (input)="setSearch(q.value)" />
           </div>
-          <button class="btn btn-sm bg-[#153e75] hover:bg-black text-white rounded-xl"
-            (click)="newAnalysis()">Nuevo</button>
         </div>
 
         <div class="max-h-[66dvh] sm:max-h-[70dvh] lg:max-h-[72dvh] overflow-auto">
@@ -53,7 +30,8 @@
             [ngClass]="selected() === a.id ? 'bg-gradient-to-r from-[#f5f9ff] to-white border-l-4 border-[#153e75] shadow-[0_8px_20px_-8px_rgba(21,62,117,0.25)]' : ''"
             (click)="select(a.id)">
             <div class="flex-1 min-w-0">
-              <div class="font-medium truncate text-slate-900">{{ a.failureMode }}</div>
+              <div class="font-medium truncate text-slate-900">{{ a.failureMode }}
+              </div>
               <div class="text-xs text-slate-500 truncate">{{ a.systemFunction }}</div>
               <div class="mt-1 flex items-center gap-2">
                 <span
@@ -73,7 +51,7 @@
 
           <div class="p-6 text-slate-500"
             [class.hidden]="!(listFiltered().length === 0 && analysesRes.status() !== 'loading')">
-            <div class="rounded-xl border border-dashed border-slate-300 p-5 text-sm text-center">
+            <div class="border border-dashed border-slate-300 p-5 text-sm text-center">
               Sin resultados. Crea un <b>nuevo análisis</b> o ajusta la búsqueda.
             </div>
           </div>
@@ -81,7 +59,6 @@
       </div>
     </aside>
 
-    <!-- FORM -->
     <main class="col-span-12 md:col-span-5 xl:col-span-6">
       <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div class="h-1 bg-[#153e75]"></div>
@@ -93,16 +70,19 @@
               <p class="text-[11px] sm:text-xs text-slate-500">Sigue la guía para describir bien efectos, causas y
                 controles. S/O/D ajustan el NPR y la AP.</p>
             </div>
-            <span class="text-[11px] sm:text-xs text-slate-500">ID: {{ form.value.id || 'nuevo' }}</span>
+            <span
+              class="text-[11px] sm:text-xs text-[#153e75] bg-[#153e75]/10 border border-[#153e75]/20 px-2 py-0.5 rounded-md font-semibold">ID:
+              {{ form.value.id || 'nuevo' }}</span>
           </div>
 
           <div class="grid grid-cols-12 gap-4 sm:gap-6">
             <label class="form-control flex flex-col gap-2 sm:gap-3 col-span-12 md:col-span-6">
               <span class="label-text text-[13px] font-medium text-slate-700">Sistema / Función</span>
-              <div class="text-[11px] text-slate-500 -mt-1">Qué debe hacer el sistema. <b>No</b> pongas la causa ni el
+              <div class="text-[11px] text-slate-500 -mt-1">Qué debe hacer el sistema. <b class="text-[#153e75]">No</b>
+                pongas la causa ni el
                 efecto.</div>
               <input
-                class="input input-bordered bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20 rounded-xl"
+                class="input input-bordered bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
                 formControlName="systemFunction" placeholder="Frenos ABS" />
               <forms-error-label [control]="form.get('systemFunction')!" />
             </label>
@@ -111,7 +91,7 @@
               <span class="label-text text-[13px] font-medium text-slate-700">Modo de fallo</span>
               <div class="text-[11px] text-slate-500 -mt-1">Cómo falla la función. Evita causas/efectos.</div>
               <input
-                class="input input-bordered bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20 rounded-xl"
+                class="input input-bordered bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
                 formControlName="failureMode" placeholder="Pérdida de presión" />
               <forms-error-label [control]="form.get('failureMode')!" />
             </label>
@@ -121,7 +101,7 @@
             <label class="form-control flex flex-col gap-2 sm:gap-3 col-span-12 lg:col-span-6">
               <span class="label-text text-[13px] font-medium text-slate-700">Efectos</span>
               <textarea autoResize rows="5"
-                class="textarea textarea-bordered min-h-[140px] bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 leading-relaxed focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20 rounded-xl"
+                class="textarea textarea-bordered min-h-[140px] bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 leading-relaxed focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
                 formControlName="failureEffects" placeholder="Impacto para cliente/seguridad/regulación…"></textarea>
               <forms-error-label [control]="form.get('failureEffects')!" />
             </label>
@@ -129,7 +109,7 @@
             <label class="form-control flex flex-col gap-2 sm:gap-3 col-span-12 lg:col-span-6">
               <span class="label-text text-[13px] font-medium text-slate-700">Causas</span>
               <textarea autoResize rows="5"
-                class="textarea textarea-bordered min-h-[140px] bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 leading-relaxed focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20 rounded-xl"
+                class="textarea textarea-bordered min-h-[140px] bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 leading-relaxed focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
                 formControlName="failureCauses"
                 placeholder="Causa raíz probable, variación del proceso, diseño, proveedor…"></textarea>
               <forms-error-label [control]="form.get('failureCauses')!" />
@@ -139,7 +119,7 @@
           <label class="form-control flex flex-col gap-2 sm:gap-3">
             <span class="label-text text-[13px] font-medium text-slate-700">Controles de prevención</span>
             <textarea autoResize rows="3"
-              class="textarea textarea-bordered min-h-[110px] bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 leading-relaxed focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20 rounded-xl"
+              class="textarea textarea-bordered min-h-[110px] bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 leading-relaxed focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
               formControlName="currentControls"
               placeholder="Inspección, pruebas, poka-yoke, validaciones, etc."></textarea>
             <forms-error-label [control]="form.get('currentControls')!" />
@@ -153,7 +133,7 @@
                   form.value.severity ?? '—' }}</span>
               </div>
               <input type="number" min="1" max="10"
-                class="input input-bordered text-center font-mono bg-white text-slate-900 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20 rounded-xl"
+                class="input input-bordered text-center font-mono bg-white text-slate-900 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
                 formControlName="severity" />
               <forms-error-label [control]="form.get('severity')!" />
             </label>
@@ -165,7 +145,7 @@
                   form.value.occurrence ?? '—' }}</span>
               </div>
               <input type="number" min="1" max="10"
-                class="input input-bordered text-center font-mono bg-white text-slate-900 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20 rounded-xl"
+                class="input input-bordered text-center font-mono bg-white text-slate-900 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
                 formControlName="occurrence" />
               <forms-error-label [control]="form.get('occurrence')!" />
             </label>
@@ -177,7 +157,7 @@
                   form.value.detection ?? '—' }}</span>
               </div>
               <input type="number" min="1" max="10"
-                class="input input-bordered text-center font-mono bg-white text-slate-900 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20 rounded-xl"
+                class="input input-bordered text-center font-mono bg-white text-slate-900 border-slate-300 focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20"
                 formControlName="detection" />
               <forms-error-label [control]="form.get('detection')!" />
             </label>
@@ -186,7 +166,6 @@
       </div>
     </main>
 
-    <!-- RESUMEN -->
     <aside class="col-span-12 md:col-span-3 xl:col-span-3">
       <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div class="p-5 sm:p-6 space-y-5" [formGroup]="form">
@@ -235,299 +214,138 @@
           <div class="divider my-1"></div>
 
           <div class="flex flex-col gap-2">
-            <button class="btn btn-md bg-[#153e75] hover:bg-black text-white rounded-xl" (click)="save()"
-              [disabled]="saving()">Guardar</button>
-            <button class="btn btn-md btn-outline border-slate-300 text-slate-800 rounded-xl"
+            <button class="btn btn-md bg-[#153e75] text-white" (click)="save()" [disabled]="saving()">Guardar</button>
+            <button class="btn btn-md btn-outline border-slate-300 text-slate-800"
               (click)="newAnalysis()">Nuevo</button>
-            <button
-              class="btn btn-md btn-outline border-red-200 text-red-700 hover:bg-red-600 hover:text-white rounded-xl"
-              (click)="delete()" [disabled]="!form.value.id">Eliminar</button>
+            <button class="btn btn-md bg-red-600 text-white" (click)="delete()"
+              [disabled]="!form.value.id">Eliminar</button>
           </div>
 
           <div class="divider my-1"></div>
 
-          <details class="collapse collapse-arrow bg-slate-50 border border-slate-200 rounded-lg">
-            <summary class="collapse-title text-sm font-semibold">Guía rápida AMEF</summary>
-            <div class="collapse-content text-[12px] leading-5 space-y-2">
-              <div>
-                <div class="font-semibold text-slate-700 mb-1">1) Flujo</div>
-                <ol class="list-decimal ml-4 space-y-1">
-                  <li>Define <b>Sistema/Función</b> ➜ <b>Modo de fallo</b>.</li>
-                  <li>Describe <b>Efectos</b> ➜ valora <b>S</b>.</li>
-                  <li>Identifica <b>Causas</b> ➜ valora <b>O</b>.</li>
-                  <li>Lista <b>Controles</b> ➜ valora <b>D</b>.</li>
-                  <li>Calcula <b>NPR = S×O×D</b> y revisa <b>AP</b>.</li>
-                </ol>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                <div class="p-2 rounded bg-white border">
-                  <div class="font-semibold text-slate-700">Severidad</div>
-                  <ul class="mt-1 space-y-0.5">
-                    <li><b>9–10</b> Peligro / incumple normas</li>
-                    <li><b>7–8</b> Muy insatisfecho / inoperable seguro</li>
-                    <li><b>5–6</b> Degradación / pérdida parcial</li>
-                    <li><b>3–4</b> Leve / la mayoría lo detecta</li>
-                    <li><b>1–2</b> Mínimo</li>
-                  </ul>
-                </div>
-                <div class="p-2 rounded bg-white border">
-                  <div class="font-semibold text-slate-700">Ocurrencia</div>
-                  <ul class="mt-1 space-y-0.5">
-                    <li><b>9–10</b> Casi inevitable</li>
-                    <li><b>7–8</b> Fallos repetidos</li>
-                    <li><b>5–6</b> Ocasionales</li>
-                    <li><b>3–4</b> Pocos</li>
-                    <li><b>1–2</b> Remotos</li>
-                  </ul>
-                </div>
-                <div class="p-2 rounded bg-white border">
-                  <div class="font-semibold text-slate-700">Detección</div>
-                  <ul class="mt-1 space-y-0.5">
-                    <li><b>9–10</b> Sin método / no detecta</li>
-                    <li><b>7–8</b> Alta prob. de no detectar</li>
-                    <li><b>5–6</b> Prob. moderada</li>
-                    <li><b>3–4</b> Prob. baja</li>
-                    <li><b>1–2</b> Detecta casi seguro</li>
-                  </ul>
-                </div>
-              </div>
+          <div role="tablist" class="tabs tabs-lifted w-full">
+            <input type="radio" name="guide-tabs" role="tab"
+              class="tab text-slate-700 [--tab-bg:white] [--tab-border-color:#e2e8f0] data-[state=checked]:text-[#153e75]"
+              aria-label="Flujo" checked />
+            <div role="tabpanel"
+              class="tab-content bg-white border border-slate-200 rounded-b-xl p-4 text-[12px] leading-5 space-y-2">
+              <div class="font-semibold text-slate-700">Flujo</div>
+              <ol class="list-decimal ml-4 space-y-1 text-slate-700">
+                <li>Define <b class="text-[#153e75]">Sistema/Función</b> → <b class="text-[#153e75]">Modo de fallo</b>.
+                </li>
+                <li>Describe <b class="text-[#153e75]">Efectos</b> y valora <b class="text-[#153e75]">S</b>.</li>
+                <li>Identifica <b class="text-[#153e75]">Causas</b> y valora <b class="text-[#153e75]">O</b>.</li>
+                <li>Lista <b class="text-[#153e75]">Controles</b> y valora <b class="text-[#153e75]">D</b>.</li>
+                <li>Calcula <b class="text-[#153e75]">NPR = S×O×D</b> y revisa <b class="text-[#153e75]">AP</b>.</li>
+              </ol>
+            </div>
 
-              <div class="p-2 rounded bg-white border">
-                <div class="font-semibold text-slate-700 mb-1">Checklist antes de guardar</div>
-                <ul class="list-disc ml-4 space-y-1">
-                  <li>Función y <b>Modo</b> de fallo sin mezclar causas/efectos.</li>
-                  <li>Efectos: cliente/seguridad/regulación.</li>
-                  <li>Causas específicas, evita genéricos.</li>
-                  <li>Controles: prevención o detección.</li>
-                  <li>Valores <b>S/O/D</b> coherentes.</li>
-                </ul>
+            <input type="radio" name="guide-tabs" role="tab"
+              class="tab text-slate-700 [--tab-bg:white] [--tab-border-color:#e2e8f0] data-[state=checked]:text-[#153e75]"
+              aria-label="Escalas" />
+            <div role="tabpanel" class="tab-content bg-white border border-slate-200 rounded-b-xl p-4">
+              <div class="grid grid-cols-1 gap-2">
+                <div class="p-2 rounded bg-slate-50 border border-[#153e75]/20">
+                  <div class="font-semibold text-[#153e75] text-[12px]">Severidad</div>
+                  <ul class="mt-1 space-y-0.5 text-[12px] text-slate-700">
+                    <li><b class="text-rose-700">9–10</b> Peligro/incumple normas</li>
+                    <li><b class="text-amber-700">7–8</b> Muy insatisfecho</li>
+                    <li><b class="text-amber-600">5–6</b> Degradación</li>
+                    <li><b class="text-emerald-700">3–4</b> Leve</li>
+                    <li><b class="text-emerald-600">1–2</b> Mínimo</li>
+                  </ul>
+                </div>
+                <div class="p-2 rounded bg-slate-50 border border-[#153e75]/20">
+                  <div class="font-semibold text-[#153e75] text-[12px]">Ocurrencia</div>
+                  <ul class="mt-1 space-y-0.5 text-[12px] text-slate-700">
+                    <li><b class="text-rose-700">9–10</b> Inevitable</li>
+                    <li><b class="text-amber-700">7–8</b> Repetidos</li>
+                    <li><b class="text-amber-600">5–6</b> Ocasionales</li>
+                    <li><b class="text-emerald-700">3–4</b> Pocos</li>
+                    <li><b class="text-emerald-600">1–2</b> Remotos</li>
+                  </ul>
+                </div>
+                <div class="p-2 rounded bg-slate-50 border border-[#153e75]/20">
+                  <div class="font-semibold text-[#153e75] text-[12px]">Detección</div>
+                  <ul class="mt-1 space-y-0.5 text-[12px] text-slate-700">
+                    <li><b class="text-rose-700">9–10</b> No detecta</li>
+                    <li><b class="text-amber-700">7–8</b> Alta prob. no detectar</li>
+                    <li><b class="text-amber-600">5–6</b> Moderada</li>
+                    <li><b class="text-emerald-700">3–4</b> Baja</li>
+                    <li><b class="text-emerald-600">1–2</b> Casi seguro</li>
+                  </ul>
+                </div>
               </div>
             </div>
-          </details>
+
+            <input type="radio" name="guide-tabs" role="tab"
+              class="tab text-slate-700 [--tab-bg:white] [--tab-border-color:#e2e8f0] data-[state=checked]:text-[#153e75]"
+              aria-label="Checklist" />
+            <div role="tabpanel" class="tab-content bg-white border border-slate-200 rounded-b-xl p-4">
+              <ul class="list-disc ml-4 space-y-1 text-[12px] text-slate-700">
+                <li>Modo ≠ causa ≠ efecto.</li>
+                <li>Efectos: cliente/seguridad/regulación.</li>
+                <li>Causas específicas, evita genéricos.</li>
+                <li>Controles: prevención o detección.</li>
+                <li>Valores S/O/D dentro de 1–10.</li>
+              </ul>
+            </div>
+
+            <input type="radio" name="guide-tabs" role="tab"
+              class="tab text-slate-700 [--tab-bg:white] [--tab-border-color:#e2e8f0] data-[state=checked]:text-[#153e75]"
+              aria-label="Ejemplo" />
+            <div role="tabpanel" class="tab-content bg-white border border-slate-200 rounded-b-xl p-4">
+              <div class="rounded-lg border border-[#153e75]/20 p-3 bg-slate-50 text-[12px]">
+                <div class="font-semibold mb-1 text-[#153e75]">Ejemplo (frenos ABS)</div>
+                <div><b class="text-slate-800">Función:</b> Mantener control de frenado.</div>
+                <div><b class="text-slate-800">Modo:</b> Pérdida de presión hidráulica.</div>
+                <div><b class="text-slate-800">Efecto:</b> Aumento de distancia de frenado.</div>
+                <div><b class="text-slate-800">Causas:</b> Fuga sello bomba / burbujas en circuito.</div>
+                <div><b class="text-slate-800">Controles:</b> Prueba de estanqueidad 100% / purga automatizada.</div>
+                <div class="mt-1"><b class="text-[#153e75]">S/O/D:</b> 8 / 4 / 3 → <b class="text-[#153e75]">NPR 96</b>
+                  • <b class="text-amber-700">AP</b> media.</div>
+              </div>
+            </div>
+          </div>
 
           @if(form.value.id){
           <div>
-            <div class="text-sm font-semibold mb-1">Acciones correctivas</div>
-            <button [routerLink]="[form.value.id, 'actions']" class="btn btn-xs btn-outline w-full rounded-xl">Ver /
-              gestionar acciones</button>
+            <button [routerLink]="[form.value.id, 'actions']" class="btn bg-[#153e75] w-full text-white">Acciones
+              correctivas</button>
             <p class="mt-2 text-[11px] text-slate-500">Añade responsables y recalcula el NPR/AP con S/O/D nuevos.</p>
           </div>
           }
+
+          <div>
+            <button [routerLink]="[this.form.value.id, 'comments']" class="btn bg-[#153e75] text-white w-full">
+              <svg aria-label="WeChat logo" width="16" height="16" xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 32 32">
+                <g fill="white">
+                  <path
+                    d="M11.606,3.068C5.031,3.068,0,7.529,0,12.393s4.344,7.681,4.344,7.681l-.706,2.676c-.093,.353,.284,.644,.602,.464l3.173-1.798c1.403,.447,4.381,.59,4.671,.603-.208-.721-.311-1.432-.311-2.095,0-3.754,3.268-9.04,10.532-9.04,.165,0,.331,.004,.496,.011-.965-4.627-5.769-7.827-11.195-7.827Zm-4.327,7.748c-.797,0-1.442-.646-1.442-1.442s.646-1.442,1.442-1.442,1.442,.646,1.442,1.442-.646,1.442-1.442,1.442Zm8.386,0c-.797,0-1.442-.646-1.442-1.442s.646-1.442,1.442-1.442,1.442,.646,1.442,1.442-.646,1.442-1.442,1.442Z">
+                  </path>
+                  <path
+                    d="M32,19.336c0-4.26-4.998-7.379-9.694-7.379-6.642,0-9.459,4.797-9.459,7.966s2.818,7.966,9.459,7.966c1.469,0,2.762-.211,3.886-.584l2.498,1.585c.197,.125,.447-.052,.394-.279l-.567-2.46c2.36-1.643,3.483-4.234,3.483-6.815Zm-12.73-.81c-.704,0-1.275-.571-1.275-1.275s.571-1.275,1.275-1.275,1.275,.571,1.275,1.275c0,.705-.571,1.275-1.275,1.275Zm6.373,0c-.704,0-1.275-.571-1.275-1.275s.571-1.275,1.275-1.275,1.275,.571,1.275,1.275-.571,1.275-1.275,1.275Z">
+                  </path>
+                </g>
+              </svg>
+              Comentarios
+
+              @if(numberNewComments()){
+              <div class="badge badge-sm badge-secondary">{{numberNewComments()}}</div>
+              }
+
+            </button>
+            <p class="mt-2 text-[11px] text-slate-500">Añade comentarios para tu equipo</p>
+          </div>
+
         </div>
       </div>
     </aside>
   </div>
 
-  <!-- ==================== COMENTARIOS (SECCIÓN REDISEÑADA + FIX LONG WORDS) ==================== -->
-  <section class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 xl:px-10 pb-10 space-y-4">
-    <div class="flex items-center justify-between">
-      <h3 class="text-lg font-semibold text-slate-900">Comentarios</h3>
-    </div>
-
-    <!-- (quitamos el alert intrusivo aquí) -->
-
-    <div class="grid grid-cols-12 gap-6">
-      <!-- ==================== Tus comentarios ==================== -->
-      <div class="col-span-12 md:col-span-6">
-        <div class="card border border-slate-200 bg-white shadow-sm rounded-2xl overflow-hidden">
-          <!-- Encabezado con acento corporativo -->
-          <div class="bg-gradient-to-r from-[#153e75] to-[#0f2e58] text-white">
-            <div class="card-body p-4 sm:p-5">
-              <div class="flex items-center justify-between">
-                <h4 class="font-semibold">Tus comentarios</h4>
-                <span class="badge badge-sm bg-white/15 border-white/20 text-white">{{ commentsByUser.value()?.length || 0 }}</span>
-              </div>
-              <div class="relative mt-3">
-                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-80" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="1.8">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="m21 21-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" />
-                </svg>
-                <input
-                  #searchCommentsByUserTerm
-                  (input)="changeSearchTermByUser(searchCommentsByUserTerm.value)"
-                  type="text"
-                  placeholder="Buscar comentario"
-                  class="input input-sm w-full pl-9 bg-white/95 text-slate-900 placeholder:text-slate-500 border-white/20 focus:border-white focus:ring-2 focus:ring-white/30 rounded-xl" />
-              </div>
-            </div>
-          </div>
-
-          <!-- Lista -->
-          <div class="card-body p-4 sm:p-5">
-            <div class="space-y-3 overflow-y-auto pr-1"
-              style="--card-h: 168px; max-height: calc(var(--card-h) * 3 + 0.75rem * 2); scrollbar-gutter: stable;">
-              @if (commentsByUser.isLoading()) {
-                <app-loader />
-              } @else {
-                @for (comment of commentsByUser.value(); track $index) {
-                  @if(userId() === comment.user.id){
-                  <div
-                    class="group/card border border-slate-200 rounded-xl bg-white shadow-sm transition hover:shadow-md hover:-translate-y-0.5"
-                    [ngClass]="commentId() === comment.id ? 'ring-2 ring-[#153e75]/30' : ''">
-                    <div class="p-4 flex flex-col gap-3">
-                      <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                          <div class="w-8 h-8 rounded-full grid place-items-center bg-[#153e75]/10 text-[#153e75] font-bold">
-                            {{ (comment.user.fullName || '•')?.[0] | uppercase }}
-                          </div>
-                          <div class="font-semibold text-sm text-slate-900">
-                            {{comment.user.fullName | titlecase}}
-                            <span class="ml-1 badge badge-primary badge-xs align-middle">Tú</span>
-                          </div>
-                        </div>
-                        <div class="text-right">
-                          <div class="text-[11px] text-slate-500">FC: {{comment.date}}</div>
-                          @if(comment.modificationDate){
-                          <div class="text-[11px] text-[#153e75]">FM: {{comment.modificationDate}}</div>
-                          }
-                        </div>
-                      </div>
-
-                      <!-- textarea editable/no editable -->
-                      <textarea
-                        #commentTextArea
-                        [disabled]="commentId() !== comment.id"
-                        [value]="comment.comment"
-                        class="textarea textarea-bordered w-full mt-1 resize-none leading-6 rounded-xl
-                               focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20
-                               break-words whitespace-pre-wrap [overflow-wrap:anywhere]
-                               [&:disabled]:cursor-default [&:disabled]:bg-slate-50 [&:disabled]:text-slate-700
-                               [&:disabled]:border-slate-200 hover:[&:disabled]:cursor-default"
-                        placeholder="Edita tu comentario…"></textarea>
-
-                      <div class="flex items-center justify-end gap-2 pt-1">
-                        <button
-                          (click)="selectCommentId(comment.id)"
-                          class="btn btn-sm btn-outline border-[#153e75]/30 text-[#153e75] hover:bg-[#153e75] hover:text-white rounded-lg">
-                          Editar
-                        </button>
-                        <button
-                          (click)="sendCommentChange(comment.id, commentTextArea.value)"
-                          [disabled]="commentId() !== comment.id"
-                          class="btn btn-sm bg-[#153e75] text-white hover:bg-[#123665] disabled:bg-slate-300 disabled:text-slate-600 rounded-lg">
-                          Guardar
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  }
-                }
-              }
-            </div>
-
-            <!-- Nuevo comentario -->
-            @if(form.value.id){
-            <div class="mt-5 rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-3 sm:p-4">
-              <div class="text-xs font-semibold text-slate-700 mb-2 flex items-center gap-2">
-                <span class="inline-block w-2 h-2 rounded-full bg-[#153e75]"></span> Nuevo comentario
-              </div>
-              <textarea
-                [value]="this.comment()"
-                (input)="changeComment(comment.value)"
-                #comment
-                class="textarea textarea-bordered h-28 w-full rounded-xl
-                       focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20
-                       break-words whitespace-pre-wrap [overflow-wrap:anywhere]"
-                placeholder="Comparte contexto, decisiones o pendientes…"
-                (keydown.control.enter)="sendComment()"
-                (keydown.meta.enter)="sendComment()"></textarea>
-              <div class="flex items-center justify-end mt-3">
-                <button class="btn btn-primary btn-sm rounded-lg bg-[#153e75] hover:bg-[#123665] border-0"
-                        (click)="sendComment()">Enviar</button>
-              </div>
-            </div>
-            }
-          </div>
-        </div>
-      </div>
-
-      <!-- ==================== Comentarios del equipo (FIX LONG WORDS) ==================== -->
-      <div class="col-span-12 md:col-span-6">
-        <div class="card border border-slate-200 bg-white shadow-sm rounded-2xl overflow-hidden">
-          <!-- Encabezado con acento -->
-          <div class="bg-gradient-to-r from-[#0f2e58] to-[#153e75] text-white">
-            <div class="card-body p-4 sm:p-5">
-              <div class="flex items-center justify-between">
-                <h4 class="font-semibold">Comentarios del equipo</h4>
-                <span class="badge badge-sm bg-white/15 border-white/20 text-white">{{ comments.value()?.length || 0 }}</span>
-              </div>
-              <div class="relative mt-3">
-                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-80" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="1.8">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="m21 21-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" />
-                </svg>
-                <input
-                  #term
-                  (input)="changeSearchTerm(term.value)"
-                  type="text"
-                  placeholder="Buscar comentario"
-                  class="input input-sm w-full pl-9 bg-white/95 text-slate-900 placeholder:text-slate-500 border-white/20 focus:border-white focus:ring-2 focus:ring-white/30 rounded-xl" />
-              </div>
-            </div>
-          </div>
-
-          <!-- Lista -->
-          <div class="card-body p-4 sm:p-5">
-            <div class="space-y-3 overflow-y-auto pr-1"
-              style="--card-h: 140px; max-height: calc(var(--card-h) * 3 + 0.75rem * 2); scrollbar-gutter: stable;">
-              @if (comments.isLoading()) {
-                <app-loader />
-              } @else {
-                @for (comment of comments.value(); track $index) {
-                <div class="border border-slate-200 rounded-xl bg-white shadow-sm p-4 overflow-hidden"
-                     style="min-height: var(--card-h);">
-                  <div class="flex items-start justify-between">
-                    <div class="flex items-start gap-3 min-w-0">
-                      <div class="w-9 h-9 flex-shrink-0 rounded-full grid place-items-center bg-[#153e75]/10 text-[#153e75] font-bold">
-                        {{ (comment.user.fullName || '•')?.[0] | uppercase }}
-                      </div>
-                      <div class="min-w-0">
-                        <div class="text-sm font-semibold text-slate-900 truncate">
-                          {{comment.user.fullName | titlecase}}
-                          @if(userId() === comment.user.id){
-                            <span class="ml-1 badge badge-primary badge-xs">Tú</span>
-                          }
-                        </div>
-                        <div class="mt-1 flex flex-wrap items-center gap-1.5">
-                          <span class="badge badge-ghost badge-xs text-slate-600">{{comment.user.email}}</span>
-                          <span class="badge badge-ghost badge-xs text-slate-600">{{comment.user.department}}</span>
-                        </div>
-                        <div class="mt-1 text-[11px] text-slate-500">FC: {{comment.date}}
-                          @if(comment.modificationDate){
-                            <span class="ml-2 text-[#153e75]">FM: {{comment.modificationDate}}</span>
-                          }
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Burbuja con wrap seguro -->
-                  <div class="mt-3">
-                    <div
-                      class="relative w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm leading-6 text-slate-700
-                             break-words whitespace-pre-wrap [overflow-wrap:anywhere] [hyphens:auto]">
-                      <span class="absolute -top-2 left-4 inline-block w-3 h-3 rotate-45 bg-slate-50 border-l border-t border-slate-200"></span>
-                      {{ comment.comment }}
-                    </div>
-                  </div>
-                </div>
-                }
-              }
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- ==================== /Comentarios del equipo ==================== -->
-    </div>
-  </section>
-  <!-- ==================== /COMENTARIOS ==================== -->
-
-  <!-- Toast genérico existente (inferior derecha) -->
   <div class="fixed bottom-4 right-4 z-50" [class.hidden]="!toast()">
-    <div
-      class="flex items-center gap-3 rounded-xl px-4 py-3 text-white shadow-lg ring-1 ring-black/5 transition-all duration-300"
+    <div class="flex items-center gap-3 px-4 py-3 text-white shadow-lg ring-1 ring-black/5 transition-all duration-300"
       [ngClass]="{
         'bg-emerald-600': toast()?.kind === 'success',
         'bg-sky-600': toast()?.kind === 'update',
@@ -552,12 +370,8 @@
     </div>
   </div>
 
-  <!-- NUEVO: aviso sutil de 'mensaje enviado' (superior derecha) -->
-  <div
-    class="fixed top-4 right-4 z-[60] transition-opacity duration-300 pointer-events-none"
-    [class.opacity-0]="!sendCommentSucces()"
-    [class.opacity-100]="sendCommentSucces()"
-    aria-live="polite">
+  <div class="fixed top-4 right-4 z-[60] transition-opacity duration-300 pointer-events-none"
+    [class.opacity-0]="!sendCommentSucces()" [class.opacity-100]="sendCommentSucces()" aria-live="polite">
     <div class="rounded-lg bg-[#153e75] text-white/95 shadow-lg ring-1 ring-black/5 px-3 py-2 flex items-center gap-2">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="2">
@@ -565,51 +379,5 @@
       </svg>
       <span class="text-xs font-medium tracking-wide">Mensaje enviado</span>
     </div>
-  </div>
-
-  <input type="checkbox" id="guide-modal" class="modal-toggle" />
-  <div class="modal">
-    <div class="modal-box max-w-3xl sm:max-w-4xl">
-      <div class="flex items-start justify-between mb-3">
-        <h3 class="font-bold text-lg">Guía para realizar un Analysis (AMEF diseño)</h3>
-        <label for="guide-modal" class="btn btn-sm btn-ghost">✕</label>
-      </div>
-
-      <ol class="list-decimal ml-5 space-y-2 text-sm">
-        <li><b>Sistema/Función:</b> qué debe hacer. No pongas causas ni efectos.</li>
-        <li><b>Modo de fallo:</b> cómo falla la función (técnico y específico).</li>
-        <li><b>Efectos:</b> cliente, seguridad y regulación. Esto guía <b>S</b>.</li>
-        <li><b>Causas:</b> raíz probable (proceso/diseño/material/proveedor/humano). Esto guía <b>O</b>.</li>
-        <li><b>Controles actuales:</b> prevención/detección (pruebas, inspecciones, poka-yoke). Esto guía <b>D</b>.</li>
-        <li><b>Valora S/O/D</b> con la escala y calcula <b>NPR = S×O×D</b>. Revisa la <b>AP</b>.</li>
-      </ol>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 text-sm">
-        <div class="rounded-lg border p-3 bg-slate-50">
-          <div class="font-semibold mb-1">Ejemplo (frenos ABS)</div>
-          <div><b>Función:</b> Mantener control de frenado.</div>
-          <div><b>Modo:</b> Pérdida de presión hidráulica.</div>
-          <div><b>Efecto:</b> Aumento de distancia de frenado (seguridad).</div>
-          <div><b>Causas:</b> Fuga sello bomba / burbujas en circuito.</div>
-          <div><b>Controles:</b> Prueba de estanqueidad 100% / purga automatizada.</div>
-          <div class="mt-1"><b>S/O/D:</b> 8 / 4 / 3 → <b>NPR 96</b> • <b>AP</b> media.</div>
-        </div>
-        <div class="rounded-lg border p-3">
-          <div class="font-semibold mb-1">Checklist rápido</div>
-          <ul class="list-disc ml-4 space-y-1">
-            <li>Modo ≠ causa ≠ efecto.</li>
-            <li>Efectos consideran cliente/seguridad/regulación.</li>
-            <li>Causas específicas (evita “error humano” sin detalle).</li>
-            <li>Controles: indica si son de prevención o detección.</li>
-            <li>Valores S/O/D dentro de 1–10 y acordes a la escala.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="modal-action">
-        <label for="guide-modal" class="btn">Entendido</label>
-      </div>
-    </div>
-    <label class="modal-backdrop" for="guide-modal"></label>
   </div>
 </div>

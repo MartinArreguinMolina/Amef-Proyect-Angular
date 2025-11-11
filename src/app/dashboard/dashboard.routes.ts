@@ -7,6 +7,7 @@ import { ActionsComponent } from "./pages/actions/actions.component";
 import { GraphicsComponent } from "./pages/graphics/graphics.component";
 import { isAdminGuard } from "../auth/guard/isAdmin.guard";
 import { superAdminGuard } from "../auth/guard/super-admin.guard";
+import { Comments } from "./pages/comments/comments";
 
 
 export const dashBoardRoutes: Routes = [
@@ -38,6 +39,10 @@ export const dashBoardRoutes: Routes = [
         canMatch: [
           isAdminGuard
         ],
+      },
+      {
+        path: 'amef/:amefId/analysis/:analysisId/comments',
+        component: Comments
       },
       {
         path: 'graphics',

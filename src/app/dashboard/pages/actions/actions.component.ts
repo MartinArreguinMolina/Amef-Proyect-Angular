@@ -15,6 +15,7 @@ import { AmefService, ActionItem, ActionCreateDto } from '../services/amef.servi
 import { FormsErrorLabelComponent } from 'src/app/shared/forms-error-label/forms-error-label.component';
 import { AuthService } from 'src/app/auth/service/auth-service.service';
 import { NavbarComponent } from "src/app/shared/navbar/navbar.component";
+import { Header } from "../../components/header/header";
 
 /* ========= Auto-resize para <textarea> ========= */
 @Directive({ selector: 'textarea[autoResize]', standalone: true })
@@ -58,7 +59,7 @@ type ToastKind = 'success' | 'update' | 'delete' | 'error';
 @Component({
   selector: 'app-actions',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AutoResizeTextareaDirective, FormsErrorLabelComponent, RouterLink, NavbarComponent],
+  imports: [CommonModule, ReactiveFormsModule, AutoResizeTextareaDirective, FormsErrorLabelComponent, Header],
   templateUrl: './actions.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

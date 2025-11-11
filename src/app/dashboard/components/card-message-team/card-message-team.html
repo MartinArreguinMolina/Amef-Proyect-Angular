@@ -1,0 +1,21 @@
+@if(userId() === comment().user.id){
+
+<div class="chat chat-end">
+  <div class="chat-header">
+    {{comment().user.fullName | titlecase}}
+    <time class="text-xs opacity-50">{{timeCreate()}}</time>
+  </div>
+  <div class="tooltip chat-bubble chat-bubble-primary">{{comment().comment}}</div>
+  <div class="chat-footer opacity-50">Enviado el {{dateCreate()}}</div>
+</div>
+
+}@else{
+<div class="chat chat-start">
+  <div class="chat-header">
+    {{comment().user.fullName | titlecase}}
+    <time class="text-xs opacity-50">{{timeCreate()}}</time>
+  </div>
+  <div class="chat-bubble">{{comment().comment}}</div>
+  <div class="chat-footer opacity-50">Enviado el {{dateCreate()}}</div>
+</div>
+}

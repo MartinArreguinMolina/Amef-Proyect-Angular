@@ -13,7 +13,7 @@ import { NavbarComponent } from "src/app/shared/navbar/navbar.component";
 
 @Component({
   selector: 'app-amef',
-  imports: [RouterLink, AmefCardComponent, AmefCardNotFoundComponent, LoaderComponent, NavbarComponent],
+  imports: [RouterLink, AmefCardComponent, AmefCardNotFoundComponent, LoaderComponent],
   templateUrl: './amef.component.html',
 })
 export class AmefComponent {

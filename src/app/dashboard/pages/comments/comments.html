@@ -1,0 +1,231 @@
+<div class="min-h-dvh bg-gradient-to-b from-white to-slate-50 text-slate-800" data-theme="light">
+  <section class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 xl:px-10 pb-10 space-y-6">
+
+    <!-- ======= RESUMEN SUPERIOR ======= -->
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div class="h-0.5 bg-gradient-to-r from-[#153e75] via-black to-[#153e75]"></div>
+      <div class="p-5 sm:p-6 lg:p-7 space-y-4">
+        <div>
+          <h3 class="text-lg sm:text-xl font-semibold text-[#153e75]">
+            Hola, {{ authService.user()?.fullName | titlecase }}.
+          </h3>
+          <p class="text-sm text-slate-600">
+            Comparte comentarios para tu equipo y revisa los mensajes del proyecto.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <!-- Métrica 1 -->
+          <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 sm:p-4">
+            <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Sistema / Función</div>
+            <div class="mt-1.5 text-sm font-medium text-slate-900 truncate">
+              {{ this.analysis.value()?.systemFunction || '—' }}
+            </div>
+          </div>
+
+          <!-- Métrica 2 -->
+          <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 sm:p-4">
+            <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">AMEF</div>
+            <div class="mt-1.5 text-sm font-medium text-slate-900 truncate">
+              {{
+              this.analysis.value()?.organizationalInformation?.component ||
+              this.analysis.value()?.organizationalInformation?.system ||
+              this.analysis.value()?.organizationalInformation?.subsystem || '—'
+              }}
+            </div>
+          </div>
+
+          <!-- Métrica 3 -->
+          <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 sm:p-4">
+            <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Sala de mensajes</div>
+            <div class="mt-1.5 text-sm font-medium text-slate-900 truncate">
+              {{ analysisId() || '—' }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======= CONTENIDO PRINCIPAL (DOS COLUMNAS) ======= -->
+    <div class="grid grid-cols-12 gap-6">
+
+      <!-- === Columna: Comentarios del Equipo === -->
+      <div class="col-span-12 md:col-span-6">
+        <div class="card border border-slate-200 bg-white shadow-sm rounded-2xl overflow-hidden" role="region"
+          aria-label="Comentarios del equipo">
+          <!-- Header pegajoso -->
+          <div class="bg-gradient-to-r from-[#0f2e58] to-[#153e75] text-white">
+            <div class="card-body p-4 sm:p-5 sticky top-0 z-10 bg-gradient-to-r from-[#0f2e58] to-[#153e75]">
+              <div class="flex items-center justify-between gap-3">
+                <h4 class="font-semibold tracking-tight">Comentarios del equipo</h4>
+                @if(this.comments.value()?.length === 0 || this.comments.isLoading()){
+                <div class="status status-info animate-bounce" aria-label="Cargando"></div>
+                }@else{
+                <span class="badge badge-sm bg-white/15 border-white/20 text-white">
+                  {{ this.comments.value()?.length }}
+                </span>
+                }
+              </div>
+
+              <div class="mt-3">
+                <label for="search-team" class="sr-only">Buscar comentario del equipo</label>
+                <input id="search-team" #term (input)="changeSearchTerm(term.value)" type="text"
+                  placeholder="Buscar en comentarios del equipo…"
+                  class="input input-sm w-full bg-white/95 text-slate-900 border-white/20 focus:border-white focus:ring-2 focus:ring-white/30 rounded-xl placeholder:text-slate-500" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Lista con scroll -->
+          <div class="card-body p-4 sm:p-5">
+            <div
+              class="space-y-3 overflow-y-auto pr-1 overscroll-contain scroll-smooth p-2 sm:p-3 rounded-xl bg-white/50"
+              style="--card-h: 184px; max-height: calc(var(--card-h) * 3 + 0.75rem * 2); scrollbar-gutter: stable;">
+
+              @for (comment of comments.value(); track $index) {
+              <app-card-message-team [comment]="comment" />
+              }
+
+              @if(this.searchComment() && this.comments.isLoading()){
+              <app-loader />
+              }@else if(this.comments.value()?.length === 0){
+              <div class="p-4 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-600">
+                No hay comentarios disponibles.
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === Columna: Tus Comentarios === -->
+      <div class="col-span-12 md:col-span-6">
+        <div class="card border border-slate-200 bg-white shadow-sm rounded-2xl overflow-hidden" role="region"
+          aria-label="Tus comentarios">
+          <!-- Header pegajoso -->
+          <div class="bg-gradient-to-r from-[#153e75] to-[#0f2e58] text-white">
+            <div class="card-body p-4 sm:p-5 sticky top-0 z-10 bg-gradient-to-r from-[#153e75] to-[#0f2e58]">
+              <div class="flex items-center justify-between gap-3">
+                <h4 class="font-semibold tracking-tight">Tus comentarios</h4>
+                @if(this.commentsByUser.value()?.length === 0 || this.commentsByUser.isLoading()){
+                <div class="status status-info animate-bounce" aria-label="Cargando"></div>
+                }@else{
+                <span class="badge badge-sm bg-white/15 border-white/20 text-white">
+                  {{ commentsByUser.value()?.length || 0 }}
+                </span>
+                }
+              </div>
+
+              <div class="mt-3">
+                <label for="search-mine" class="sr-only">Buscar tus comentarios</label>
+                <input id="search-mine" #searchCommentsByUserTerm
+                  (input)="changeSearchTermByUser(searchCommentsByUserTerm.value)" type="text"
+                  placeholder="Buscar en tus comentarios…"
+                  class="input input-sm w-full bg-white/95 text-slate-900 border-white/20 focus:border-white focus:ring-2 focus:ring-white/30 rounded-xl placeholder:text-slate-500" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Lista + Editor -->
+          <div class="card-body p-4 sm:p-5">
+            <!-- Lista con scroll -->
+            <div
+              class="space-y-3 overflow-y-auto pr-1 overscroll-contain scroll-smooth p-2 sm:p-3 rounded-xl bg-white/50"
+              style="--card-h: 172px; max-height: calc(var(--card-h) * 3 + 0.75rem * 2); scrollbar-gutter: stable;">
+
+              @if(this.searchCommentByUser() && this.commentsByUser.isLoading()){
+              <app-loader />
+              }@else if(this.commentsByUser.value()?.length === 0){
+              <div class="p-4 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-600">
+                No hay comentarios disponibles.
+              </div>
+              }@else{
+              @for (comment of commentsByUser.value(); track $index) {
+              <div
+                class="group/card border border-slate-200 rounded-xl bg-white shadow-sm transition hover:shadow-md hover:-translate-y-0.5">
+                <div class="p-4 sm:p-5 flex flex-col gap-3">
+                  <!-- Header del comentario -->
+                  <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div
+                        class="w-8 h-8 rounded-full grid place-items-center bg-[#153e75]/10 text-[#153e75] font-bold">
+                        {{ (comment.user.fullName || '•')?.[0] | uppercase }}
+                      </div>
+                      <div class="font-semibold text-sm text-slate-900 truncate">
+                        {{ comment.user.fullName | titlecase }}
+                      </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                      <div class="text-[11px] text-slate-500">Creado: {{ locateDateString(comment.createdAt) }}</div>
+                      @if(comment.updatedAt !== comment.createdAt){
+                      <div class="text-[11px] text-white/90 bg-[#153e75]/30 inline-block px-2 py-0.5 rounded-md">
+                        Modificado: {{ locateDateString(comment.updatedAt) }}
+                      </div>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Contenido editable (sin cursor prohibido al deshabilitar) -->
+                  <textarea #commentTextArea [disabled]="commentId() !== comment.id" [value]="comment.comment"
+                    class="textarea textarea-bordered w-full mt-1 resize-none leading-6 rounded-xl
+                               focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20
+                               break-words whitespace-pre-wrap [overflow-wrap:anywhere]
+                               [&:disabled]:cursor-default [&:disabled]:bg-slate-50 [&:disabled]:text-slate-700 [&:disabled]:border-slate-200" placeholder="Edita tu comentario…"></textarea>
+
+                  <!-- Acciones -->
+                  <div class="flex flex-wrap items-center justify-end gap-2 pt-1">
+                    <button (click)="selectCommentId(comment.id)"
+                      class="btn btn-sm btn-outline border-[#153e75]/30 text-[#153e75] hover:bg-[#153e75] hover:text-white rounded-lg">
+                      Editar
+                    </button>
+
+                    <button (click)="clearCommentId(); commentTextArea.value = comment.comment"
+                      class="btn btn-sm btn-outline border-[#153e75]/30 text-[#153e75] hover:bg-[#153e75] hover:text-white rounded-lg">
+                      Cancelar
+                    </button>
+
+                    <button (click)="sendCommentChange(comment.id, commentTextArea.value)"
+                      [disabled]="commentId() !== comment.id" class="btn btn-sm bg-[#153e75] text-white hover:bg-[#123665]
+                                 disabled:bg-slate-300 disabled:text-slate-600 rounded-lg">
+                      Guardar
+                    </button>
+
+                    <button (click)="deleteComment(comment.id)" class="btn btn-sm btn-error rounded-lg">
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              </div>
+              }
+              }
+            </div>
+
+            <!-- Nuevo comentario -->
+            <div class="mt-5 rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-3 sm:p-4">
+              <div class="text-xs font-semibold text-slate-700 mb-2 flex items-center justify-between">
+                <span>Nuevo comentario</span>
+                <span class="text-[11px] text-slate-500">Ctrl/⌘ + Enter</span>
+              </div>
+
+              <textarea [value]="this.comment()" (input)="changeComment(comment.value)" #comment class="textarea textarea-bordered h-28 w-full rounded-xl
+                       focus:border-[#153e75] focus:ring-2 focus:ring-[#153e75]/20
+                       break-words whitespace-pre-wrap [overflow-wrap:anywhere]"
+                placeholder="Comparte contexto, decisiones o pendientes…" (keydown.control.enter)="sendComment()"
+                (keydown.meta.enter)="sendComment()"></textarea>
+
+              <div class="flex items-center justify-end mt-3">
+                <button class="btn btn-primary btn-sm rounded-lg bg-[#153e75] hover:bg-[#123665] border-0"
+                  (click)="sendComment();">
+                  Enviar
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+</div>
