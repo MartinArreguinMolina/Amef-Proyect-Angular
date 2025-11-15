@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, OnInit, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { CardMessageTeam } from '../../components/card-message-team/card-message-team';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { AuthService } from 'src/app/auth/service/auth-service.service';
@@ -14,12 +14,67 @@ import { ActivatedRoute } from '@angular/router';
   templateUrl: './comments.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Comments implements OnInit {
+export class Comments implements OnInit, OnDestroy, AfterViewInit {
+
+  @ViewChild('teamMessagesContainer')
+  private teamMessagesContainer?: ElementRef<HTMLDivElement>;
+
+  @ViewChild('userMessagesContainer')
+  private userMessagesContainer?: ElementRef<HTMLDivElement>;
+
+  constructor() {
+    effect(() => {
+      const _ = this.comments.value(); // fuerza la dependencia
+      setTimeout(() => this.scrollTeamToBottom(), 0);
+    });
+
+    // Cuando cambian tus comentarios
+    effect(() => {
+      const _ = this.commentsByUser.value();
+      setTimeout(() => this.scrollUserToBottom(), 0);
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.scrollTeamToBottom();
+    this.scrollUserToBottom();
+  }
+
+  private scrollTeamToBottom(): void {
+    const el = this.teamMessagesContainer?.nativeElement;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }
+
+  private scrollUserToBottom(): void {
+    const el = this.userMessagesContainer?.nativeElement;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }
+
+  authService = inject(AuthService);
+  amefService = inject(AmefService)
+  router = inject(ActivatedRoute);
 
   analysisId = signal<string>('')
   amefId = signal<string>('')
 
+
+  roomMember = rxResource({
+    stream: () => {
+      return this.amefService.getRoomMembersByAnalysis(this.userId()!, this.amefId(), this.analysisId());
+    }
+  })
+
+  async ngOnDestroy() {
+    await firstValueFrom(this.amefService.updateRoomMember(this.roomMember.value()?.id!, {
+      lastConnection: new Date().toISOString()
+    }))
+  }
+
   ngOnInit() {
+    this.scrollTeamToBottom();
+    this.scrollUserToBottom();
     const analysisId = this.router.snapshot.paramMap.get('analysisId');
     this.analysisId.set(analysisId!)
 
@@ -29,7 +84,7 @@ export class Comments implements OnInit {
 
     this.amefService.jointCommentRoom(analysisId!)
 
-    if(this.amefService.numberNewComments().get(this.analysisId())! > 0){
+    if (this.amefService.numberNewComments().get(this.analysisId())! > 0) {
       this.amefService.resetNumberNewComments(this.analysisId())
     }
   }
@@ -51,16 +106,12 @@ export class Comments implements OnInit {
       this.comments.reload()
     }
 
-    if(deletedComment){
+    if (deletedComment) {
       this.comments.reload()
       this.commentsByUser.reload()
     }
 
   })
-
-  authService = inject(AuthService);
-  amefService = inject(AmefService)
-  router = inject(ActivatedRoute);
 
   searchCommentByUser = signal<string>('');
   commentId = signal<string>('')

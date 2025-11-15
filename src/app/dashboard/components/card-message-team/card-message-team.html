@@ -1,21 +1,36 @@
 @if(userId() === comment().user.id){
 
-<div class="chat chat-end">
+<div class="chat chat-end max-w-full overflow-x-hidden">
   <div class="chat-header">
     {{comment().user.fullName | titlecase}}
     <time class="text-xs opacity-50">{{timeCreate()}}</time>
   </div>
-  <div class="tooltip chat-bubble chat-bubble-primary">{{comment().comment}}</div>
+  <div
+    class="tooltip chat-bubble bg-[#153e75] text-white
+           whitespace-pre-wrap break-words [overflow-wrap:anywhere] hyphens-auto
+           min-w-0 max-w-[95%] sm:max-w-[80%]">
+    {{comment().comment}}
+  </div>
   <div class="chat-footer opacity-50">Enviado el {{dateCreate()}}</div>
 </div>
 
 }@else{
-<div class="chat chat-start">
+<div class="chat chat-start max-w-full overflow-x-hidden">
   <div class="chat-header">
     {{comment().user.fullName | titlecase}}
     <time class="text-xs opacity-50">{{timeCreate()}}</time>
   </div>
-  <div class="chat-bubble">{{comment().comment}}</div>
-  <div class="chat-footer opacity-50">Enviado el {{dateCreate()}}</div>
+  <div
+    class="chat-bubble
+           whitespace-pre-wrap break-words [overflow-wrap:anywhere] hyphens-auto
+           min-w-0 max-w-[95%] sm:max-w-[80%]">
+    {{comment().comment}}
+  </div>
+  <div class="chat-footer opacity-50">
+    Enviado el {{dateCreate()}}
+    @if(isNew()){
+    <div class="badge badge-xs badge-secondary">Nuevo</div>
+    }
+  </div>
 </div>
 }

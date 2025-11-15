@@ -1,92 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { environments } from '@env/environmets';
-import { Amef, AmefPatch, AnalysisDto } from '../../interfaces/interfaces';
+import { ActionCreateDto, ActionItem, Amef, AmefPatch, Analysis, AnalysisDto, Comment, Departament, DtoComments, roomMembers } from '../../interfaces/interfaces';
 import { AnalysisItem, CreateAnalysisPayload, UpdateAnalysisPayload } from '../analysis/analysis.component';
-import { Observable, delay} from 'rxjs';
+import { Observable, delay } from 'rxjs';
 import { UserReponse } from '@interfaces/interfaces';
 import { io, Socket } from 'socket.io-client';
 import { AuthService } from 'src/app/auth/service/auth-service.service';
-
-export interface Analysis {
-  id:                        string;
-  organizationalInformation: OrganizationalInformation;
-  actions:                   any[];
-  systemFunction:            string;
-  failureMode:               string;
-  failureEffects:            string;
-  severity:                  number;
-  failureCauses:             string;
-  occurrence:                number;
-  currentControls:           string;
-  detection:                 number;
-  npr:                       number;
-}
-
-export interface OrganizationalInformation {
-  amefId:            string;
-  revision:          number;
-  system:            string;
-  subsystem:         null;
-  component:         null;
-  proyectCode:       string;
-  leadingDepartment: string;
-  dateOfOrigin:      Date;
-  targetDate:        Date;
-}
-
-export interface ActionItem {
-  id: string;
-  recommendedAction: string;
-  responsible: string;
-  targetDate: string;
-
-  implementedAction?: string | null;
-  completionDate?: string | null;
-
-  newSeverity?: number | null;
-  newOccurrence?: number | null;
-  newDetection?: number | null;
-
-  nprBefore?: number | null;
-}
-
-export interface ActionCreateDto {
-  recommendedAction: string;
-  responsible: string;
-  targetDate: string;
-
-  implementedAction?: string;
-  completionDate?: string;
-
-  newSeverity?: number;
-  newOccurrence?: number;
-  newDetection?: number;
-}
-
-export interface Comment {
-  id: string
-  comment: string;
-  createdAt: string,
-  updatedAt: string,
-  analysis: Analysis
-  user: Userplane
-}
-
-export interface Userplane {
-  id: string
-  fullName: string,
-  email: string,
-  department: string,
-  rol: string,
-}
-
-export interface DtoComments {
-  userUuid: string,
-  comment: string,
-  analysisUuid: string,
-  date: string,
-}
 
 @Injectable({ providedIn: 'root' })
 export class AmefService {
@@ -121,7 +41,7 @@ export class AmefService {
     this.onDeleteComment()
   }
 
-  resetNumberNewComments(id: string){
+  resetNumberNewComments(id: string) {
     this.newCommentCount.update(v => {
       const next = new Map(v);
       next.delete(id);
@@ -133,12 +53,11 @@ export class AmefService {
     this.socket.emit('joinRoom', analysisId);
   }
 
-  onCommentNew(){
+  onCommentNew() {
     this.socket.on('comment:new', (data: Comment) => {
-      console.log('Nuevo comentario recibido via WS:', data.analysis.id);
       this.comment.set(data);
 
-      if(this.userId() !== data.user.id){
+      if (this.userId() !== data.user.id) {
 
         this.newCommentCount.update(prev => {
           const next = new Map(prev)
@@ -152,16 +71,14 @@ export class AmefService {
     });
   }
 
-  onUpdateComment(){
+  onUpdateComment() {
     this.socket.on('comment:update', (data: Comment) => {
-      console.log('Comentario actualizado recibido via WS:', data);
       this.commentUpdate.set(data);
     });
   }
 
-  onDeleteComment(){
+  onDeleteComment() {
     this.socket.on('comment:delete', (data: Comment) => {
-      console.log('Comentario eliminado', data)
       this.deletedComment.set(data)
     })
   }
@@ -170,16 +87,12 @@ export class AmefService {
     if (!this.socket.connected) this.socket.connect()
   }
 
-  disconnect() {
-    // if (this.socket.connected) this.socket.disconnect()
-  }
-
   getUsersByDepartmentAndTerm(department: string, user: string) {
     return this.http.get<UserReponse[]>(`${this.baseUrl}/auth/department/${department}/user/${user}`)
   }
 
   getDepartaments(term: string) {
-    return this.http.get<{ id: string, department: string }[]>(`${this.baseUrl}/departments/${term}`)
+    return this.http.get<Departament[]>(`${this.baseUrl}/departments/${term}`)
   }
 
   getTeamByTerm(id: string, term: string) {
@@ -232,7 +145,7 @@ export class AmefService {
     return this.http.get<AnalysisItem[]>(`${this.baseUrl}/amef/${amefId}/analysis`);
   }
 
-  getAnalysisPlane(amefId: string, analysisId: string){
+  getAnalysisPlane(amefId: string, analysisId: string) {
     return this.http.get<Analysis>(`${this.baseUrl}/amef/${amefId}/analysis/${analysisId}`)
   }
 
@@ -313,7 +226,20 @@ export class AmefService {
     return this.http.patch(`${this.baseUrl}/comments/${id}`, body)
   }
 
-  deleteComment(id: string){
+  deleteComment(id: string) {
     return this.http.delete(`${this.baseUrl}/comments/${id}`)
+  }
+
+  // roomMembers
+  getRoomMembers(userId: string, amefId: string) {
+    return this.http.get<roomMembers[]>(`${this.baseUrl}/room-members/${userId}/amef/${amefId}`)
+  }
+
+  getRoomMembersByAnalysis(userId: string, amefId: string, analysisId: string) {
+    return this.http.get<roomMembers>(`${this.baseUrl}/room-members/${userId}/amef/${amefId}/analysis/${analysisId}`)
+  }
+
+  updateRoomMember(id: string, body: {}) {
+    return this.http.patch(`${this.baseUrl}/room-members/${id}`, body)
   }
 }

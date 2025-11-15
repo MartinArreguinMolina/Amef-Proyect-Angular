@@ -11,11 +11,12 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { of, Observable } from 'rxjs';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 
-import { AmefService, ActionItem, ActionCreateDto } from '../services/amef.service';
+import { AmefService} from '../services/amef.service';
 import { FormsErrorLabelComponent } from 'src/app/shared/forms-error-label/forms-error-label.component';
 import { AuthService } from 'src/app/auth/service/auth-service.service';
 import { NavbarComponent } from "src/app/shared/navbar/navbar.component";
 import { Header } from "../../components/header/header";
+import { ActionCreateDto, ActionItem } from '../../interfaces/interfaces';
 
 /* ========= Auto-resize para <textarea> ========= */
 @Directive({ selector: 'textarea[autoResize]', standalone: true })

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, JsonPipe } from '@angular/common';
 import { Location } from '@angular/common';
 import {
   ChangeDetectionStrategy, Component, OnInit,
@@ -11,12 +11,13 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
-import { AmefService } from '../services/amef.service';
+import { AmefService} from '../services/amef.service';
 import { firstValueFrom, of } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
 import { FormsErrorLabelComponent } from 'src/app/shared/forms-error-label/forms-error-label.component';
 import { AuthService } from 'src/app/auth/service/auth-service.service';
 import { Header } from "../../components/header/header";
+import { roomMembers } from '../../interfaces/interfaces';
 
 
 export interface AnalysisItem {
@@ -107,7 +108,7 @@ type ToastKind = 'success' | 'update' | 'delete' | 'error';
   templateUrl: './analysis.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AnalysisComponent implements OnInit, OnDestroy {
+export class AnalysisComponent implements OnInit {
   constructor(private location: Location) { }
 
   private fb = inject(FormBuilder);
@@ -137,6 +138,7 @@ export class AnalysisComponent implements OnInit, OnDestroy {
   searchComment = signal<string>('')
   numberNewComments = signal<number>(0)
 
+  roomMembers = signal<roomMembers[]>([])
 
   toast = signal<{ kind: ToastKind; text: string } | null>(null);
   private toastTimer?: any;
@@ -152,7 +154,6 @@ export class AnalysisComponent implements OnInit, OnDestroy {
     params: () => this.amefId() || null,
     stream: ({ params }) => params ? this.api.listAnalyses(params) : of([]),
   });
-
 
   listFiltered = computed<AnalysisItem[]>(() => {
     const list = this.analysesRes.value() ?? [];
@@ -304,11 +305,11 @@ export class AnalysisComponent implements OnInit, OnDestroy {
 
     const id = this.route.snapshot.paramMap.get('amefId');
     if (id) this.amefId.set(id);
+
+    const roomMembers = await firstValueFrom(this.api.getRoomMembers(this.authService.user()!.id, this.amefId()))
+    this.roomMembers.set(roomMembers)
   }
 
-  ngOnDestroy(): void {
-    this.api.disconnect()
-  }
 
   setSearch(value: string) { this.search.set(value); }
 
