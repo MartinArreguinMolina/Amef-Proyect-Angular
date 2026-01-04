@@ -7,18 +7,16 @@ import {
 import {
   FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators
 } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { of, Observable } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { of, Observable, firstValueFrom } from 'rxjs';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
-
-import { AmefService} from '../services/amef.service';
+import { AmefService } from '../services/amef.service';
 import { FormsErrorLabelComponent } from 'src/app/shared/forms-error-label/forms-error-label.component';
 import { AuthService } from 'src/app/auth/service/auth-service.service';
-import { NavbarComponent } from "src/app/shared/navbar/navbar.component";
 import { Header } from "../../components/header/header";
 import { ActionCreateDto, ActionItem } from '../../interfaces/interfaces';
+import { Modal } from "../../components/modal/modal";
 
-/* ========= Auto-resize para <textarea> ========= */
 @Directive({ selector: 'textarea[autoResize]', standalone: true })
 export class AutoResizeTextareaDirective {
   constructor(private el: ElementRef<HTMLTextAreaElement>) { }
@@ -31,7 +29,6 @@ export class AutoResizeTextareaDirective {
   }
 }
 
-/* ========= Tipos ========= */
 export interface UserOption {
   id?: string;
   fullName: string;
@@ -60,7 +57,7 @@ type ToastKind = 'success' | 'update' | 'delete' | 'error';
 @Component({
   selector: 'app-actions',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AutoResizeTextareaDirective, FormsErrorLabelComponent, Header],
+  imports: [CommonModule, ReactiveFormsModule, AutoResizeTextareaDirective, FormsErrorLabelComponent, Header, Modal],
   templateUrl: './actions.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -69,9 +66,8 @@ export class ActionsComponent implements OnInit {
   private api = inject(AmefService);
   private fb = inject(FormBuilder);
   private location = inject(Location);
-  private auth = inject(AuthService);
+  auth = inject(AuthService);
 
-  /* ====== UI / estado ====== */
   responsibleError = signal<boolean>(false);
   termSearch = signal<string>('');
   department = signal<string>('');
@@ -84,7 +80,6 @@ export class ActionsComponent implements OnInit {
   saving = signal<boolean>(false);
   creatingNew = signal<boolean>(false);
 
-  /* ====== Toast ====== */
   toast = signal<{ kind: ToastKind; text: string } | null>(null);
   private toastTimer?: any;
   private showToast(text: string, kind: ToastKind = 'success', ms = 2200) {
@@ -98,7 +93,6 @@ export class ActionsComponent implements OnInit {
     this.toast.set(null);
   }
 
-  /* ====== Data remota ====== */
   departaments = rxResource({
     stream: () => this.api.getDepartaments('')
   });
@@ -113,7 +107,7 @@ export class ActionsComponent implements OnInit {
           : of([])
   });
 
-  /* ====== Métricas NPR base ====== */
+
   analysisRes = rxResource<
     { severity: number; occurrence: number; detection: number } | null,
     { amefId: string; analysisId: string } | null
@@ -133,7 +127,6 @@ export class ActionsComponent implements OnInit {
     return s && o && d ? s * o * d : null;
   });
 
-  /* ====== Listado de acciones ====== */
   actionsRes = rxResource<ActionItem[], { amefId: string; analysisId: string } | null>({
     params: () => {
       const a = this.amefId(); const b = this.analysisId();
@@ -162,7 +155,6 @@ export class ActionsComponent implements OnInit {
     });
   });
 
-  /* ====== Form ====== */
   form: ActionForm = this.fb.group({
     id: this.fb.control<string | null>(null),
 
@@ -195,7 +187,6 @@ export class ActionsComponent implements OnInit {
 
   nprEffective = computed<number | null>(() => this.nprAfter() ?? this.nprBefore());
 
-  /* ====== Sync selección -> form ====== */
   private syncFormEffect = effect(() => {
     const list = this.listFiltered();
     const current = this.selected();
@@ -278,7 +269,6 @@ export class ActionsComponent implements OnInit {
     this.termSearch.set('');
   }
 
-  /* ====== Listado ====== */
   select(id: string) {
     this.creatingNew.set(false);
     this.selected.set(id);
@@ -290,8 +280,7 @@ export class ActionsComponent implements OnInit {
     this.form.reset({ id: null, responsible: null, responsibleText: '' });
   }
 
-  /* ====== Guardar / Eliminar ====== */
-  save() {
+  async save() {
     const target = this.form.value.targetDate ? new Date(this.form.value.targetDate).getTime() : 0;
     const done = this.form.value.completionDate ? new Date(this.form.value.completionDate).getTime() : 0;
     if (done && target && done < target) {
@@ -310,6 +299,21 @@ export class ActionsComponent implements OnInit {
     const wasCreate = !this.form.value.id;
 
     const responsibleName = this.form.value.responsible!.fullName;
+
+    const dataAmef = await firstValueFrom(this.api.getAmefById(this.amefId()));
+
+    const amef = dataAmef.subsystem || dataAmef.component || dataAmef.system;
+    const typeAmef = dataAmef.subsystem ? 'Subsistema' : dataAmef.component ? 'Componente' : 'Sistema';
+
+    await firstValueFrom(this.api.sendNotificationEmail({
+      to: this.form.value.responsible!.email || '',
+      amefId: this.amefId(),
+      analysisId: this.analysisId(),
+      amef: amef,
+      typeAmef: typeAmef,
+      action: this.form.value.recommendedAction,
+      name: responsibleName
+    }));
 
     const dto: ActionCreateDto = {
       recommendedAction: this.form.value.recommendedAction!,
@@ -360,7 +364,6 @@ export class ActionsComponent implements OnInit {
     });
   }
 
-  /* ====== Helpers UI ====== */
   nprColor(npr: number | null) {
     if (!npr) return 'badge-ghost';
     if (npr >= 200) return 'bg-red-100 text-red-800 border-red-200';

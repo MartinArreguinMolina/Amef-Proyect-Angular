@@ -18,6 +18,8 @@ import { FormsErrorLabelComponent } from 'src/app/shared/forms-error-label/forms
 import { AuthService } from 'src/app/auth/service/auth-service.service';
 import { Header } from "../../components/header/header";
 import { roomMembers } from '../../interfaces/interfaces';
+import { Modal } from "../../components/modal/modal";
+import { Sockets } from '../services/sockets.service';
 
 
 export interface AnalysisItem {
@@ -104,7 +106,7 @@ type ToastKind = 'success' | 'update' | 'delete' | 'error';
 @Component({
   selector: 'app-analysis',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AutoResizeTextareaDirective, FormsErrorLabelComponent, RouterLink, Header],
+  imports: [CommonModule, ReactiveFormsModule, AutoResizeTextareaDirective, FormsErrorLabelComponent, RouterLink, Header, Modal],
   templateUrl: './analysis.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -115,7 +117,7 @@ export class AnalysisComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   api = inject(AmefService);
-  private authService = inject(AuthService);
+  authService = inject(AuthService);
 
   userId = computed(() => this.authService.user()?.id)
 
@@ -282,27 +284,7 @@ export class AnalysisComponent implements OnInit {
     }, { emitEvent: false });
   });
 
-  private x = effect(() => {
-    this.api.jointCommentRoom(this.analysisIdFromUrl()!)
-    const count = this.api.numberNewComments()
-
-    if (count.get(this.analysisIdFromUrl()!)! > 0) {
-      console.log(count.get(this.analysisIdFromUrl()!)!)
-      this.numberNewComments.set(count.get(this.analysisIdFromUrl()!)!)
-    } else {
-      this.numberNewComments.set(0)
-    }
-  })
-
   async ngOnInit() {
-    this.api.jointCommentRoom(this.analysisIdFromUrl()!)
-    const count = this.api.numberNewComments()
-
-    if (count.get(this.analysisIdFromUrl()!)! > 0) {
-      console.log(count.get(this.analysisIdFromUrl()!)!)
-      this.numberNewComments.set(count.get(this.analysisIdFromUrl()!)!)
-    }
-
     const id = this.route.snapshot.paramMap.get('amefId');
     if (id) this.amefId.set(id);
 

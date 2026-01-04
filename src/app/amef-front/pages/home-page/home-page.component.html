@@ -1,41 +1,86 @@
-<!-- Home: ¿Qué es AMEF? Guía completa (Corporate Navy/White) -->
-<div class="min-h-screen bg-base-100" data-theme="light">
-  <!-- usuario -->
-  <div class="container mx-auto px-6 lg:px-12 py-2 text-sm text-base-content/60">
-    {{authService.user()?.fullName | titlecase}}
+<div class="min-h-screen bg-base-100 text-base-content selection:bg-[#153e75]/15 selection:text-[#0f2e58]"
+  data-theme="light">
+  <div class="bg-white/70 border-b border-base-200">
+    <div
+      class="container mx-auto px-6 lg:px-12 py-2 flex items-center justify-between gap-3 text-sm text-base-content/60">
+      <span class="truncate">{{authService.user()?.fullName | titlecase}}</span>
+      <span class="hidden sm:inline-flex items-center gap-2">
+        <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#153e75]/60"></span>
+        <span class="text-xs">Guía rápida AMEF</span>
+      </span>
+    </div>
   </div>
-  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-base-200">
+
+  <header
+    class="sticky top-0 z-40 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/70 border-b border-base-200">
+    <div class="h-[3px] bg-gradient-to-r from-transparent via-[#153e75] to-transparent opacity-70"></div>
     <div class="container mx-auto px-6 lg:px-12 h-16 flex items-center justify-between">
       <a class="inline-flex items-center gap-2 font-bold text-lg" href="#inicio">
         <span
-          class="inline-grid place-items-center w-9 h-9 rounded-lg bg-gradient-to-br from-[#153e75] to-[#0f2e58] text-white shadow-sm">
+          class="inline-grid place-items-center w-9 h-9 rounded-xl bg-gradient-to-br from-[#153e75] to-[#0f2e58] text-white shadow-sm ring-1 ring-black/5">
           <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8">
             <path d="M3 12h3m12 0h3M12 3v3m0 12v3" />
             <circle cx="12" cy="12" r="4" />
           </svg>
         </span>
-        <span class="tracking-tight">AMEF — Guía y Uso</span>
+        <span class="tracking-tight">AMEF</span>
       </a>
-      <nav class="hidden md:flex items-center gap-6 text-sm">
-        <a href="#que-es" class="link link-hover hover:text-[#0f2e58]">¿Qué es?</a>
-        <a href="#para-que" class="link link-hover hover:text-[#0f2e58]">¿Para qué sirve?</a>
-        <a href="#como-usarlo" class="link link-hover hover:text-[#0f2e58]">Cómo usarlo</a>
-        <a href="#glosario" class="link link-hover hover:text-[#0f2e58]">Glosario</a>
-        <a href="#faq" class="link link-hover hover:text-[#0f2e58]">FAQ</a>
+
+      <nav class="hidden md:flex items-center gap-1 text-sm">
+        <a href="#que-es" class="px-2 rounded-lg hover:bg-base-200/60 hover:text-[#0f2e58] transition">¿Qué es?</a>
+        <a href="#para-que" class="px-2 rounded-lg hover:bg-base-200/60 hover:text-[#0f2e58] transition">¿Para qué
+          sirve?</a>
+        <a href="#como-usarlo" class="px-2 rounded-lg hover:bg-base-200/60 hover:text-[#0f2e58] transition">Cómo
+          usarlo</a>
+        <a href="#glosario"
+          class="px-2 rounded-lg hover:bg-base-200/60 hover:text-[#0f2e58] transition">Glosario</a>
+        <a href="#faq" class="px-2 rounded-lg hover:bg-base-200/60 hover:text-[#0f2e58] transition">FAQ</a>
       </nav>
-      @if(authService.authStatus() === 'not-authenticated'){
-      <button type="button" routerLink="/auth/login" class="btn btn-sm bg-[#153e75] text-white hover:bg-black">
-        Iniciar sesión
-      </button>
-      }
-      @if(authService.authStatus() === 'authenticated'){
-      <button type="button" class="btn btn-warning btn-sm" (click)="authService.logout()">
-        Cerrar sesión
-      </button>
-      }
+
+      <div class="flex items-center gap-2">
+        <div class="md:hidden dropdown">
+          <button type="button" class="btn btn-ghost btn-sm" tabindex="0" aria-label="Abrir menú">
+            <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+          </button>
+          <ul tabindex="0"
+            class="dropdown-content mt-3 z-[1] menu p-2 shadow-lg bg-white rounded-2xl w-56 border border-base-200">
+            <li><a href="#que-es" class="rounded-xl">¿Qué es?</a></li>
+            <li><a href="#para-que" class="rounded-xl">¿Para qué sirve?</a></li>
+            <li><a href="#como-usarlo" class="rounded-xl">Cómo usarlo</a></li>
+            <li><a href="#glosario" class="rounded-xl">Glosario</a></li>
+            <li><a href="#faq" class="rounded-xl">FAQ</a></li>
+          </ul>
+        </div>
+
+        @if(authService.authStatus() === 'not-authenticated'){
+        <div class="grid grid-flow-col grid-cols-2 gap-2">
+          <div class="col-span-1">
+            <button type="button" routerLink="/auth/login"
+              class="btn btn-sm bg-[#153e75] text-white hover:bg-black shadow-sm">
+              Iniciar sesión
+            </button>
+          </div>
+          <div class="col-span-1">
+            <button type="button" routerLink="/auth/register"
+              class="btn btn-sm shadow-sm hover:bg-[#153e75] hover:text-white border border-[#153e75] text-[#153e75]">
+              Registrarse
+            </button>
+          </div>
+        </div>
+        }
+
+        @if(authService.authStatus() === 'authenticated'){
+        <button type="button" class="btn btn-warning btn-sm" (click)="authService.logout()">
+          Cerrar sesión
+        </button>
+        }
+      </div>
     </div>
   </header>
-  <section id="inicio" class="relative overflow-hidden">
+
+  <section id="inicio" class="relative overflow-hidden scroll-mt-24">
     <div class="absolute inset-0 -z-10">
       <div class="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-slate-100"></div>
       <svg
@@ -53,94 +98,124 @@
     </div>
 
     <div class="container mx-auto px-6 lg:px-12">
-      <div class="hero min-h-[60vh]">
-        <div class="hero-content text-center">
-          <div class="max-w-4xl">
-            <div
-              class="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200 bg-white/70 backdrop-blur">
-              <span class="w-2 h-2 rounded-full bg-[#0f2e58]"></span>
-              <span class="text-sm text-[#0f2e58] font-medium">AIAG–VDA • DFMEA • PFMEA • AP</span>
+      <div class="py-12 md:py-16 lg:py-20">
+        <div class="max-w-4xl mx-auto text-center">
+
+          <h1 class="mt-5 text-4xl md:text-6xl font-extrabold leading-tight tracking-tight">
+            <span class="text-[#0f2e58]">AMEF</span>: ¿qué es y cómo usarlo?
+          </h1>
+
+          <p class="mt-6 text-lg md:text-xl text-base-content/80">
+            El <strong class="text-base-content">Análisis de Modo y Efecto de Falla</strong> es una herramienta
+            preventiva que identifica
+            posibles fallas en productos o procesos, evalúa sus causas y consecuencias, y ayuda a priorizar acciones
+            correctivas para mejorar la calidad, seguridad y confiabilidad.
+          </p>
+
+          <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a routerLink="/dashboard" class="btn btn-wide bg-[#153e75] text-white hover:bg-black shadow-sm">
+              Ir al tablero
+            </a>
+            <a href="#como-usarlo"
+              class="btn btn-outline border-[#153e75] text-[#153e75] hover:bg-[#153e75] hover:text-white">
+              Guía rápida
+            </a>
+          </div>
+
+          <div class="mt-10 grid sm:grid-cols-3 gap-3">
+            <div class="rounded-2xl border border-base-200 bg-white/70 backdrop-blur p-4 text-left">
+              <div class="text-xs text-base-content/60">Severidad</div>
+              <div class="mt-1 font-semibold text-[#0f2e58]">Impacto al cliente</div>
+              <div class="mt-1 text-sm text-base-content/70">Seguridad, cumplimiento y función.</div>
             </div>
-
-            <h1 class="text-4xl md:text-6xl font-extrabold leading-tight">
-              <span class="text-[#0f2e58]">AMEF</span>: ¿qué es y cómo usarlo?
-            </h1>
-            <p class="mt-6 text-lg md:text-xl text-base-content/70">
-              El <strong>Análisis de Modo y Efecto de Falla</strong> identifica riesgos en diseño y proceso,
-              prioriza acciones y documenta la <em>prevención</em> y <em>detección</em> para reducir la probabilidad de
-              fallos.
-            </p>
-
-            <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <a routerLink="/dashboard" class="btn btn-wide bg-[#153e75] text-white hover:bg-black shadow-sm">Ir al
-                tablero</a>
-              <a href="#como-usarlo"
-                class="btn btn-outline border-[#153e75] text-[#153e75] hover:bg-[#153e75] hover:text-white">Guía
-                rápida</a>
+            <div class="rounded-2xl border border-base-200 bg-white/70 backdrop-blur p-4 text-left">
+              <div class="text-xs text-base-content/60">Ocurrencia</div>
+              <div class="mt-1 font-semibold text-[#0f2e58]">Probabilidad de falla</div>
+              <div class="mt-1 text-sm text-base-content/70">Basada en datos e historial.</div>
             </div>
-
-            <div class="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-base-content/60">
-              <span class="badge badge-ghost border-base-300">IATF 16949</span>
-              <span class="badge badge-ghost border-base-300">APQP • PPAP</span>
-              <span class="badge badge-ghost border-base-300">MSA • SPC</span>
-              <span class="badge badge-ghost border-base-300">Action Priority (AP)</span>
+            <div class="rounded-2xl border border-base-200 bg-white/70 backdrop-blur p-4 text-left">
+              <div class="text-xs text-base-content/60">Detección</div>
+              <div class="mt-1 font-semibold text-[#0f2e58]">Capacidad de detectar</div>
+              <div class="mt-1 text-sm text-base-content/70">Controles preventivos/detectivos.</div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </section>
-  <section id="que-es" class="py-14 border-t border-base-200 bg-white/80">
+
+  <section id="que-es" class="py-14 border-t border-base-200 bg-white/80 scroll-mt-24">
     <div class="container mx-auto px-6 lg:px-12 grid lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2">
-        <h2 class="text-3xl md:text-4xl font-bold">
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight">
           <span class="text-[#0f2e58]">¿Qué es</span> un AMEF?
         </h2>
-        <p class="mt-3 text-base-content/70">
-          Es una herramienta sistemática para <strong>anticipar fallas</strong>, evaluar su impacto (Severidad),
+        <p class="mt-3 text-base-content/80">
+          Es una herramienta sistemática para <strong class="text-base-content">anticipar fallas</strong>, evaluar su
+          impacto (Severidad),
           su probabilidad (Ocurrencia) y la capacidad de detectarlas (Detección), y así
-          <strong>priorizar acciones</strong> que eliminen el riesgo o lo reduzcan a un nivel aceptable.
+          <strong class="text-base-content">priorizar acciones</strong> que eliminen el riesgo o lo reduzcan a un nivel
+          aceptable.
         </p>
 
         <div class="mt-6 grid sm:grid-cols-2 gap-4">
-          <div class="p-4 rounded-xl border border-base-200 bg-base-100">
-            <div class="font-semibold">DFMEA (Diseño)</div>
-            <p class="text-sm text-base-content/70">Riesgos del producto/función: requisitos, interfaces,
-              características especiales.</p>
+          <div class="p-5 rounded-2xl border border-base-200 bg-base-100 hover:shadow-md transition shadow-sm">
+            <div class="flex items-start justify-between gap-3">
+              <div class="font-semibold">DFMEA (Diseño)</div>
+              <span class="badge badge-outline border-[#153e75]/30 text-[#153e75]">Producto</span>
+            </div>
+            <p class="mt-2 text-sm text-base-content/70">
+              Riesgos del producto/función: requisitos, interfaces, características especiales.
+            </p>
           </div>
-          <div class="p-4 rounded-xl border border-base-200 bg-base-100">
-            <div class="font-semibold">PFMEA (Proceso)</div>
-            <p class="text-sm text-base-content/70">Riesgos del proceso de fabricación/ensamble: métodos, máquinas,
-              materiales y medición.</p>
+          <div class="p-5 rounded-2xl border border-base-200 bg-base-100 hover:shadow-md transition shadow-sm">
+            <div class="flex items-start justify-between gap-3">
+              <div class="font-semibold">PFMEA (Proceso)</div>
+              <span class="badge badge-outline border-[#153e75]/30 text-[#153e75]">Manufactura</span>
+            </div>
+            <p class="mt-2 text-sm text-base-content/70">
+              Riesgos del proceso de fabricación/ensamble: métodos, máquinas, materiales y medición.
+            </p>
           </div>
         </div>
       </div>
 
-      <aside id="para-que" class="space-y-3">
-        <h3 class="text-xl font-bold text-[#0f2e58]">¿Para qué sirve?</h3>
+      <aside id="para-que" class="space-y-3 scroll-mt-24">
+        <h3 class="text-xl font-bold text-[#0f2e58] tracking-tight">¿Para qué sirve?</h3>
         <ul class="space-y-2 text-base-content/80">
-          <li>• Prevenir no conformidades y reclamos.</li>
-          <li>• Diseñar controles preventivos y de detección efectivos.</li>
-          <li>• Priorizar recursos mediante <b>AP (Action Priority)</b>.</li>
-          <li>• Documentar decisiones y asegurar la trazabilidad (PPAP/Auditoría).</li>
-          <li>• Compartir lecciones aprendidas entre proyectos y plantas.</li>
+          <li class="flex gap-2"><span class="text-[#153e75]">•</span><span>Prevenir no conformidades y reclamos.</span>
+          </li>
+          <li class="flex gap-2"><span class="text-[#153e75]">•</span><span>Diseñar controles preventivos y de detección
+              efectivos.</span></li>
+          <li class="flex gap-2"><span class="text-[#153e75]">•</span><span>Priorizar recursos mediante <b
+                class="text-base-content">AP (Action Priority)</b>.</span></li>
+          <li class="flex gap-2"><span class="text-[#153e75]">•</span><span>Documentar decisiones y asegurar la
+              trazabilidad (PPAP/Auditoría).</span></li>
+          <li class="flex gap-2"><span class="text-[#153e75]">•</span><span>Compartir lecciones aprendidas entre
+              proyectos y plantas.</span></li>
         </ul>
-        <div class="p-3 rounded-lg bg-[#153e75]/5 border border-[#153e75]/15 text-sm">
-          <b>Cuándo usarlo:</b> al iniciar un diseño/proceso, ante cambios de ingeniería, incidencias repetitivas o
+
+        <div class="p-4 rounded-2xl bg-[#153e75]/5 border border-[#153e75]/15 text-sm text-base-content/80">
+          <b class="text-base-content">Cuándo usarlo:</b> al iniciar un diseño/proceso, ante cambios de ingeniería,
+          incidencias repetitivas o
           lanzamientos de nuevos productos/proveedores.
         </div>
       </aside>
     </div>
   </section>
-  <section id="como-usarlo" class="py-16 md:py-20">
+
+  <section id="como-usarlo" class="py-16 md:py-20 scroll-mt-24">
     <div class="container mx-auto px-6 lg:px-12">
       <div class="text-center mb-10">
-        <h2 class="text-3xl md:text-4xl font-bold"><span class="text-[#0f2e58]">Cómo</span> usar AMEF (AIAG–VDA)</h2>
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight">
+          <span class="text-[#0f2e58]">Cómo</span> usar AMEF
+        </h2>
         <p class="mt-3 text-base-content/70">Siete pasos prácticos con lo mínimo indispensable para empezar bien.</p>
       </div>
 
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <article class="card bg-base-100 border border-base-200 hover:shadow-md">
+        <article
+          class="card bg-base-100 border border-base-200 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
           <div class="card-body">
             <h3 class="card-title">1) Planificación & alcance</h3>
             <p class="text-sm text-base-content/70">Definir qué partes/procesos cubres, clientes, requisitos, historial
@@ -149,7 +224,8 @@
           </div>
         </article>
 
-        <article class="card bg-base-100 border border-base-200 hover:shadow-md">
+        <article
+          class="card bg-base-100 border border-base-200 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
           <div class="card-body">
             <h3 class="card-title">2) Análisis de estructura</h3>
             <p class="text-sm text-base-content/70">Descomponer sistema → subsistemas → componentes (o proceso →
@@ -158,8 +234,8 @@
           </div>
         </article>
 
-        <!-- 3 Función -->
-        <article class="card bg-base-100 border border-base-200 hover:shadow-md">
+        <article
+          class="card bg-base-100 border border-base-200 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
           <div class="card-body">
             <h3 class="card-title">3) Funciones y requisitos</h3>
             <p class="text-sm text-base-content/70">Qué debe lograr, criterios de aceptación y características
@@ -168,8 +244,8 @@
           </div>
         </article>
 
-        <!-- 4 Fallas -->
-        <article class="card bg-base-100 border border-base-200 hover:shadow-md">
+        <article
+          class="card bg-base-100 border border-base-200 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
           <div class="card-body">
             <h3 class="card-title">4) Modos, efectos y causas</h3>
             <p class="text-sm text-base-content/70">Lista de modos de falla, su efecto en el cliente y causas probables.
@@ -178,18 +254,18 @@
           </div>
         </article>
 
-        <!-- 5 Riesgo -->
-        <article class="card bg-base-100 border border-base-200 hover:shadow-md">
+        <article
+          class="card bg-base-100 border border-base-200 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
           <div class="card-body">
             <h3 class="card-title">5) Riesgo: S–O–D & AP</h3>
-            <p class="text-sm text-base-content/70">Valorar S, O, D; opcional NPR; decidir con <b>AP</b>
-              (Alto/Medio/Bajo).</p>
+            <p class="text-sm text-base-content/70">Valorar S, O, D; opcional NPR; decidir con <b
+                class="text-base-content">AP</b> (Alto/Medio/Bajo).</p>
             <div class="mt-2 text-xs text-base-content/60">Reglas AIAG–VDA para AP.</div>
           </div>
         </article>
 
-        <!-- 6 Acciones -->
-        <article class="card bg-base-100 border border-base-200 hover:shadow-md">
+        <article
+          class="card bg-base-100 border border-base-200 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
           <div class="card-body">
             <h3 class="card-title">6) Acciones y verificación</h3>
             <p class="text-sm text-base-content/70">Eliminar modo/causa; si no, fortalecer prevención/detección;
@@ -198,8 +274,8 @@
           </div>
         </article>
 
-        <!-- 7 Resultados -->
-        <article class="card bg-base-100 border border-base-200 hover:shadow-md">
+        <article
+          class="card bg-base-100 border border-base-200 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 sm:col-span-2 lg:col-span-1">
           <div class="card-body">
             <h3 class="card-title">7) Resultados & control de cambios</h3>
             <p class="text-sm text-base-content/70">Actualizar revisiones, PPAP/entregables, auditoría y lecciones
@@ -209,145 +285,188 @@
         </article>
       </div>
 
-      <!-- Mini checklists -->
       <div class="mt-10 grid lg:grid-cols-2 gap-6">
-        <div class="rounded-xl border border-base-200 bg-white p-5">
-          <h3 class="text-lg font-semibold">Checklist de inicio</h3>
-          <ul class="mt-2 text-sm text-base-content/70 space-y-1.5">
-            <li>▸ Alcance claro (sistema/operación) y equipo multidisciplinario.</li>
-            <li>▸ Definir escalas S–O–D comunes para todos.</li>
-            <li>▸ Recolectar datos: reclamos, scrap, auditorías, DFx, MSA/SPC.</li>
-            <li>▸ Acordar regla de decisión con <b>AP</b>.</li>
+        <div class="rounded-2xl border border-base-200 bg-white p-6 shadow-sm">
+          <div class="flex items-center justify-between gap-4">
+            <h3 class="text-lg font-semibold tracking-tight">Checklist de inicio</h3>
+            <span class="badge bg-[#153e75]/10 text-[#0f2e58] border-[#153e75]/15">Inicio</span>
+          </div>
+          <ul class="mt-3 text-sm space-y-2 text-base-content/75">
+            <li class="flex gap-2"><span class="text-[#153e75]">▸</span><span>Alcance claro (sistema/operación) y equipo
+                multidisciplinario.</span></li>
+            <li class="flex gap-2"><span class="text-[#153e75]">▸</span><span>Definir escalas S–O–D comunes para
+                todos.</span></li>
+            <li class="flex gap-2"><span class="text-[#153e75]">▸</span><span>Recolectar datos: reclamos, scrap,
+                auditorías, DFx, MSA/SPC.</span></li>
+            <li class="flex gap-2"><span class="text-[#153e75]">▸</span><span>Acordar regla de decisión con <b
+                  class="text-base-content">AP</b>.</span></li>
           </ul>
         </div>
-        <div class="rounded-xl border border-base-200 bg-white p-5">
-          <h3 class="text-lg font-semibold">Checklist de cierre</h3>
-          <ul class="mt-2 text-sm text-base-content/70 space-y-1.5">
-            <li>▸ Acciones implementadas con evidencia y verificación.</li>
-            <li>▸ S′/O′/D′ revaluados y AP recalculada.</li>
-            <li>▸ PPAP/entregables actualizados; comunicación a producción/proveedores.</li>
-            <li>▸ Lecciones aprendidas registradas y compartidas.</li>
+
+        <div class="rounded-2xl border border-base-200 bg-white p-6 shadow-sm">
+          <div class="flex items-center justify-between gap-4">
+            <h3 class="text-lg font-semibold tracking-tight">Checklist de cierre</h3>
+            <span class="badge bg-[#153e75]/10 text-[#0f2e58] border-[#153e75]/15">Cierre</span>
+          </div>
+          <ul class="mt-3 text-sm space-y-2 text-base-content/75">
+            <li class="flex gap-2"><span class="text-[#153e75]">▸</span><span>Acciones implementadas con evidencia y
+                verificación.</span></li>
+            <li class="flex gap-2"><span class="text-[#153e75]">▸</span><span>S′/O′/D′ revaluados y AP
+                recalculada.</span></li>
+            <li class="flex gap-2"><span class="text-[#153e75]">▸</span><span>PPAP/entregables actualizados;
+                comunicación a producción/proveedores.</span></li>
+            <li class="flex gap-2"><span class="text-[#153e75]">▸</span><span>Lecciones aprendidas registradas y
+                compartidas.</span></li>
           </ul>
         </div>
       </div>
 
-      <!-- CTA -->
       <div class="mt-10 flex flex-wrap gap-3 justify-center">
-        <a routerLink="/dashboard" class="btn bg-[#153e75] text-white hover:bg-black">Comenzar un AMEF</a>
-        <a class="btn btn-outline border-[#153e75] text-[#153e75] hover:bg-[#153e75] hover:text-white">Descargar
-          plantillas</a>
+        <a routerLink="/dashboard" class="btn bg-[#153e75] text-white hover:bg-black shadow-sm">Comenzar un AMEF</a>
+        <a (click)="openExampleAmef()" class="btn btn-outline border-[#153e75] text-[#153e75] hover:bg-[#153e75] hover:text-white">Ver ejemplo</a>
       </div>
     </div>
   </section>
 
-  <!-- GLOSARIO Y ERRORES COMUNES -->
-  <section id="glosario" class="py-16 bg-base-200/60 border-y border-base-300/50">
+  <section id="glosario" class="py-16 bg-base-200/60 border-y border-base-300/50 scroll-mt-24">
     <div class="container mx-auto px-6 lg:px-12 grid lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2">
-        <h2 class="text-3xl md:text-4xl font-bold"><span class="text-[#0f2e58]">Glosario</span> esencial</h2>
-        <dl class="mt-4 grid sm:grid-cols-2 gap-4">
-          <div class="p-4 rounded-xl bg-white border">
-            <dt class="font-semibold">Modo de falla</dt>
-            <dd class="text-sm text-base-content/70">Cómo puede fallar la función o el proceso.</dd>
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight">
+          <span class="text-[#0f2e58]">Glosario</span> esencial
+        </h2>
+
+        <dl class="mt-5 grid sm:grid-cols-2 gap-4">
+          <div
+            class="p-5 rounded-2xl bg-white/90 backdrop-blur border border-base-200 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-[#153e75]"></span>
+              <dt class="font-semibold">Modo de falla</dt>
+            </div>
+            <dd class="mt-2 text-sm text-base-content/70">Cómo puede fallar la función o el proceso.</dd>
           </div>
-          <div class="p-4 rounded-xl bg-white border">
-            <dt class="font-semibold">Efecto</dt>
-            <dd class="text-sm text-base-content/70">Consecuencia en cliente/uso/seguridad/norma.</dd>
+
+          <div
+            class="p-5 rounded-2xl bg-white/90 backdrop-blur border border-base-200 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-[#153e75]"></span>
+              <dt class="font-semibold">Efecto</dt>
+            </div>
+            <dd class="mt-2 text-sm text-base-content/70">Consecuencia en cliente/uso/seguridad/norma.</dd>
           </div>
-          <div class="p-4 rounded-xl bg-white border">
-            <dt class="font-semibold">Causa</dt>
-            <dd class="text-sm text-base-content/70">Origen del modo (método, máquina, material, humano, entorno,
+
+          <div
+            class="p-5 rounded-2xl bg-white/90 backdrop-blur border border-base-200 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-[#153e75]"></span>
+              <dt class="font-semibold">Causa</dt>
+            </div>
+            <dd class="mt-2 text-sm text-base-content/70">Origen del modo (método, máquina, material, humano, entorno,
               medición).</dd>
           </div>
-          <div class="p-4 rounded-xl bg-white border">
-            <dt class="font-semibold">Controles</dt>
-            <dd class="text-sm text-base-content/70">Preventivos (evitan) y detectivos (descubren) el modo/causa.</dd>
+
+          <div
+            class="p-5 rounded-2xl bg-white/90 backdrop-blur border border-base-200 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-[#153e75]"></span>
+              <dt class="font-semibold">Controles</dt>
+            </div>
+            <dd class="mt-2 text-sm text-base-content/70">Preventivos (evitan) y detectivos (descubren) el modo/causa.
+            </dd>
           </div>
-          <div class="p-4 rounded-xl bg-white border">
-            <dt class="font-semibold">S–O–D</dt>
-            <dd class="text-sm text-base-content/70">Severidad, Ocurrencia, Detección (1–10) con escalas acordadas.</dd>
+
+          <div
+            class="p-5 rounded-2xl bg-white/90 backdrop-blur border border-base-200 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-[#153e75]"></span>
+              <dt class="font-semibold">S–O–D</dt>
+            </div>
+            <dd class="mt-2 text-sm text-base-content/70">Severidad, Ocurrencia, Detección (1–10) con escalas acordadas.
+            </dd>
           </div>
-          <div class="p-4 rounded-xl bg-white border">
-            <dt class="font-semibold">AP (Action Priority)</dt>
-            <dd class="text-sm text-base-content/70">Regla AIAG–VDA para priorizar acciones (Alto/Medio/Bajo).</dd>
+
+          <div
+            class="p-5 rounded-2xl bg-white/90 backdrop-blur border border-base-200 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-[#153e75]"></span>
+              <dt class="font-semibold">AP (Action Priority)</dt>
+            </div>
+            <dd class="mt-2 text-sm text-base-content/70">Regla AIAG–VDA para priorizar acciones (Alto/Medio/Bajo).</dd>
           </div>
         </dl>
       </div>
 
       <aside class="space-y-3">
-        <h3 class="text-xl font-bold text-[#0f2e58]">Errores comunes</h3>
-        <ul class="text-base-content/80 text-sm space-y-2">
-          <li>• Llenar “por cumplir” sin datos reales.</li>
-          <li>• Mezclar función, modo y causa en un solo texto.</li>
-          <li>• No acordar escalas S–O–D y cambiar criterios a mitad.</li>
-          <li>• Acciones vagas sin responsable ni fecha.</li>
-          <li>• No verificar eficacia; AMEF “estático”.</li>
+        <h3 class="text-xl font-bold text-[#0f2e58] tracking-tight">Errores comunes</h3>
+        <ul class="text-sm space-y-2 text-base-content/75">
+          <li class="flex gap-2"><span class="text-[#153e75]">•</span><span>Llenar “por cumplir” sin datos
+              reales.</span></li>
+          <li class="flex gap-2"><span class="text-[#153e75]">•</span><span>Mezclar función, modo y causa en un solo
+              texto.</span></li>
+          <li class="flex gap-2"><span class="text-[#153e75]">•</span><span>No acordar escalas S–O–D y cambiar criterios
+              a mitad.</span></li>
+          <li class="flex gap-2"><span class="text-[#153e75]">•</span><span>Acciones vagas sin responsable ni
+              fecha.</span></li>
+          <li class="flex gap-2"><span class="text-[#153e75]">•</span><span>No verificar eficacia; AMEF
+              “estático”.</span></li>
         </ul>
-        <div class="p-3 rounded-lg bg-white border text-sm">
-          <b>Tip:</b> prioriza eliminar el <em>modo</em> o la <em>causa</em>; si no, fortalece prevención/detección.
+
+        <div class="p-4 rounded-2xl bg-white border border-base-200 text-sm text-base-content/80 shadow-sm">
+          <b class="text-base-content">Tip:</b> prioriza eliminar el <em>modo</em> o la <em>causa</em>; si no, fortalece
+          prevención/detección.
         </div>
       </aside>
     </div>
   </section>
 
-  <!-- FAQ -->
-  <section id="faq" class="py-16">
+  <section id="faq" class="py-16 scroll-mt-24">
     <div class="container mx-auto px-6 lg:px-12">
       <div class="text-center mb-8">
-        <h2 class="text-3xl md:text-4xl font-bold">Preguntas frecuentes</h2>
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Preguntas frecuentes</h2>
         <p class="mt-2 text-base-content/70">Resuelve dudas habituales antes de empezar.</p>
       </div>
 
       <div class="grid lg:grid-cols-2 gap-4">
-        <div class="collapse collapse-arrow bg-white border border-base-200">
+        <div
+          class="collapse collapse-arrow bg-white border border-base-200 rounded-2xl hover:border-[#153e75]/25 hover:shadow-sm transition">
           <input type="checkbox" />
           <div class="collapse-title text-base font-semibold">¿NPR sigue siendo obligatorio?</div>
-          <div class="collapse-content text-sm text-base-content/70">
-            No. AIAG–VDA prioriza la <b>AP</b>. Puedes calcular NPR como apoyo, pero decide con AP.
+          <div class="collapse-content text-sm text-base-content/75">
+            No. AIAG–VDA prioriza la <b class="text-base-content">AP</b>. Puedes calcular NPR como apoyo, pero decide
+            con AP.
           </div>
         </div>
-        <div class="collapse collapse-arrow bg-white border border-base-200">
+
+        <div
+          class="collapse collapse-arrow bg-white border border-base-200 rounded-2xl hover:border-[#153e75]/25 hover:shadow-sm transition">
           <input type="checkbox" />
           <div class="collapse-title text-base font-semibold">¿Cada cuánto reviso el AMEF?</div>
-          <div class="collapse-content text-sm text-base-content/70">
+          <div class="collapse-content text-sm text-base-content/75">
             En cada cambio significativo (diseño/proceso/proveedor), incidentes o hitos de APQP; mínimo anual.
           </div>
         </div>
-        <div class="collapse collapse-arrow bg-white border border-base-200">
+
+        <div
+          class="collapse collapse-arrow bg-white border border-base-200 rounded-2xl hover:border-[#153e75]/25 hover:shadow-sm transition">
           <input type="checkbox" />
           <div class="collapse-title text-base font-semibold">¿Quién participa?</div>
-          <div class="collapse-content text-sm text-base-content/70">
+          <div class="collapse-content text-sm text-base-content/75">
             Equipo multidisciplinario: Diseño/Producto, Proceso/Manufactura, Calidad, Proveedores, Mantenimiento y quien
             opera/inspecciona.
           </div>
         </div>
-        <div class="collapse collapse-arrow bg-white border border-base-200">
+
+        <div
+          class="collapse collapse-arrow bg-white border border-base-200 rounded-2xl hover:border-[#153e75]/25 hover:shadow-sm transition">
           <input type="checkbox" />
           <div class="collapse-title text-base font-semibold">¿Se aplica fuera de automotriz?</div>
-          <div class="collapse-content text-sm text-base-content/70">
+          <div class="collapse-content text-sm text-base-content/75">
             Sí: aeroespacial, médico, alimentos, software/servicios; se adaptan escalas y ejemplos.
           </div>
         </div>
       </div>
 
       <div class="mt-10 flex flex-wrap gap-3 justify-center">
-        <a routerLink="/dashboard" class="btn bg-[#153e75] text-white hover:bg-black">Crear mi primer AMEF</a>
-      </div>
-    </div>
-  </section>
-
-  <section class="py-16">
-    <div class="container mx-auto px-6 lg:px-12">
-      <div class="card bg-gradient-to-br from-[#153e75] to-[#0f2e58] text-primary-content shadow-xl">
-        <div class="card-body items-center text-center">
-          <h2 class="card-title text-3xl md:text-4xl">Estandariza tu AMEF con AIAG–VDA</h2>
-          <p class="opacity-90">Plantillas, escalas S–O–D, reglas AP y checklist de verificación.</p>
-          <div class="card-actions mt-4">
-            <a routerLink="/dashboard" class="btn bg-white text-[#0f2e58] hover:bg-slate-100">Empezar ahora</a>
-            <a class="btn btn-outline text-primary-content border-primary-content hover:bg-white/10">Solicitar
-              acompañamiento</a>
-          </div>
-        </div>
+        <a routerLink="/dashboard" class="btn bg-[#153e75] text-white hover:bg-black shadow-sm">Crear mi primer AMEF</a>
       </div>
     </div>
   </section>

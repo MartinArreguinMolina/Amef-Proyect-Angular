@@ -128,7 +128,12 @@
             <label class="form-control flex flex-col gap-1.5 sm:gap-2 col-span-12 sm:col-span-4">
               <div class="flex items-center justify-between">
                 <span class="label-text text-[13px] font-medium text-slate-700">Severidad (1–10)</span>
-                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-xs font-semibold">{{
+                <span [class.text-emerald-600]="form.value.severity! >= 1 && form.value.severity! <= 2"
+                  [class.text-emerald-700]="form.value.severity! >= 3 && form.value.severity! <= 4"
+                  [class.text-amber-600]="form.value.severity! >= 5 && form.value.severity! <= 6"
+                  [class.text-amber-700]="form.value.severity! >= 7 && form.value.severity! <= 8"
+                  [class.text-rose-700]="form.value.severity! >= 9 && form.value.severity! <= 10"
+                  class="px-2 py-0.5 rounded bg-slate-100 text-xs font-semibold">{{
                   form.value.severity ?? '—' }}</span>
               </div>
               <input type="number" min="1" max="10"
@@ -140,7 +145,12 @@
             <label class="form-control flex flex-col gap-1.5 sm:gap-2 col-span-12 sm:col-span-4">
               <div class="flex items-center justify-between">
                 <span class="label-text text-[13px] font-medium text-slate-700">Ocurrencia (1–10)</span>
-                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-xs font-semibold">{{
+                <span [class.text-emerald-600]="form.value.occurrence! >= 1 && form.value.occurrence! <= 2"
+                  [class.text-emerald-700]="form.value.occurrence! >= 3 && form.value.occurrence! <= 4"
+                  [class.text-amber-600]="form.value.occurrence! >= 5 && form.value.occurrence! <= 6"
+                  [class.text-amber-700]="form.value.occurrence! >= 7 && form.value.occurrence! <= 8"
+                  [class.text-rose-700]="form.value.occurrence! >= 9 && form.value.occurrence! <= 10"
+                  class="px-2 py-0.5 rounded bg-slate-100 text-xs font-semibold">{{
                   form.value.occurrence ?? '—' }}</span>
               </div>
               <input type="number" min="1" max="10"
@@ -152,7 +162,12 @@
             <label class="form-control flex flex-col gap-1.5 sm:gap-2 col-span-12 sm:col-span-4">
               <div class="flex items-center justify-between">
                 <span class="label-text text-[13px] font-medium text-slate-700">Detección (1–10)</span>
-                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-xs font-semibold">{{
+                <span [class.text-emerald-600]="form.value.detection! >= 1 && form.value.detection! <= 2"
+                  [class.text-emerald-700]="form.value.detection! >= 3 && form.value.detection! <= 4"
+                  [class.text-amber-600]="form.value.detection! >= 5 && form.value.detection! <= 6"
+                  [class.text-amber-700]="form.value.detection! >= 7 && form.value.detection! <= 8"
+                  [class.text-rose-700]="form.value.detection! >= 9 && form.value.detection! <= 10"
+                  class="px-2 py-0.5 rounded bg-slate-100 text-xs font-semibold">{{
                   form.value.detection ?? '—' }}</span>
               </div>
               <input type="number" min="1" max="10"
@@ -216,8 +231,10 @@
             <button class="btn btn-md bg-[#153e75] text-white" (click)="save()" [disabled]="saving()">Guardar</button>
             <button class="btn btn-md btn-outline border-slate-300 text-slate-800"
               (click)="newAnalysis()">Nuevo</button>
-            <button class="btn btn-md bg-red-600 text-white" (click)="delete()"
+            @if(authService.isSuperAdmin()){
+            <button class="btn btn-md bg-red-600 text-white" onclick="my_modal_1.showModal()"
               [disabled]="!form.value.id">Eliminar</button>
+            }
           </div>
 
           <div class="divider my-1"></div>
@@ -336,8 +353,8 @@
               }
 
             </button>
-            }
             <p class="mt-2 text-[11px] text-slate-500">Añade comentarios para tu equipo</p>
+            }
           </div>
 
         </div>
@@ -382,3 +399,7 @@
     </div>
   </div>
 </div>
+
+<app-modal description="Al borrar el análisis, nunca podrá ser recuperado y todo el contenido relacionado
+          también será eliminado permanentemente para ti y para todo tu equipo." title="¿Eliminar análisis?"
+  [delete]="delete.bind(this)" />

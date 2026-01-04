@@ -1,21 +1,47 @@
 <div class="min-h-dvh bg-gradient-to-b from-white to-slate-50 text-slate-800" data-theme="light">
   <section class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 xl:px-10 pb-10 space-y-6">
 
-    <!-- ======= RESUMEN SUPERIOR ======= -->
-    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-      <div class="h-0.5 bg-gradient-to-r from-[#153e75] via-black to-[#153e75]"></div>
-      <div class="p-5 sm:p-6 lg:p-7 space-y-4">
-        <div>
-          <h3 class="text-lg sm:text-xl font-semibold text-[#153e75]">
-            Hola, {{ authService.user()?.fullName | titlecase }}.
-          </h3>
-          <p class="text-sm text-slate-600">
-            Comparte comentarios para tu equipo y revisa los mensajes del proyecto.
-          </p>
+    <div class="rounded-2xl border border-slate-200 bg-white/80 shadow-sm overflow-hidden">
+      <div class="h-1 bg-gradient-to-r from-[#0f2e58] via-[#153e75] to-[#0f2e58]"></div>
+      <div class="p-5 sm:p-6 lg:p-7 space-y-4 bg-gradient-to-br from-slate-50 via-white to-slate-50">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Panel de mensajes AMEF
+            </p>
+            <h3 class="mt-1 text-xl sm:text-2xl font-semibold text-[#0f2e58]">
+              Hola, {{ authService.user()?.fullName | titlecase }}.
+            </h3>
+            <p class="text-sm text-slate-600">
+              Comparte comentarios para tu equipo y revisa los mensajes del proyecto.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div
+              class="hidden sm:grid h-11 w-11 rounded-2xl bg-[#153e75]/10 text-[#153e75] font-semibold place-items-center shadow-inner border border-[#153e75]/20">
+              {{ (authService.user()?.fullName || '•')?.[0] | uppercase }}
+            </div>
+            <div class="flex flex-col items-start sm:items-end gap-1 text-xs">
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 text-emerald-700 px-3 py-1 border border-emerald-100">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Sala activa: <span class="font-semibold">{{ analysisId() || '—' }}</span>
+              </span>
+              <span class="text-[11px] text-slate-500">
+                Personas en la sala:
+                <span class="font-semibold text-slate-700">
+                  @if(this.socketService.roomMembers() === 1){
+                    Solo tú
+                  }@else{
+                    {{ this.socketService.roomMembers() }}
+                  }
+                </span>
+              </span>
+            </div>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <!-- Métrica 1 -->
           <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 sm:p-4">
             <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Sistema / Función</div>
             <div class="mt-1.5 text-sm font-medium text-slate-900 truncate">
@@ -23,7 +49,6 @@
             </div>
           </div>
 
-          <!-- Métrica 2 -->
           <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 sm:p-4">
             <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">AMEF</div>
             <div class="mt-1.5 text-sm font-medium text-slate-900 truncate">
@@ -35,21 +60,29 @@
             </div>
           </div>
 
-          <!-- Métrica 3 -->
           <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 sm:p-4">
             <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Sala de mensajes</div>
             <div class="mt-1.5 text-sm font-medium text-slate-900 truncate">
               {{ analysisId() || '—' }}
             </div>
           </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 sm:p-4 sm:col-span-2 lg:col-span-1">
+            <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Personas conectadas dentro de la sala</div>
+            <div class="mt-1.5 text-sm font-medium text-slate-900 truncate">
+              @if(this.socketService.roomMembers() === 1){
+                Solo tu
+              }@else{
+                {{ this.socketService.roomMembers() }}
+              }
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- ======= CONTENIDO PRINCIPAL (DOS COLUMNAS) ======= -->
     <div class="grid grid-cols-12 gap-6">
 
-      <!-- === Columna: Comentarios del Equipo === -->
       <div class="col-span-12 md:col-span-6">
         <div class="card border border-slate-200 bg-white shadow-sm rounded-2xl overflow-hidden" role="region"
           aria-label="Comentarios del equipo">
@@ -97,7 +130,6 @@
         </div>
       </div>
 
-      <!-- === Columna: Tus Comentarios === -->
       <div class="col-span-12 md:col-span-6">
         <div class="card border border-slate-200 bg-white shadow-sm rounded-2xl overflow-hidden" role="region"
           aria-label="Tus comentarios">

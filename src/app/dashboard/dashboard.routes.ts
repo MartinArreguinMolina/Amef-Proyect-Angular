@@ -4,11 +4,9 @@ import { AmefComponent } from "./pages/amef/amef.component";
 import { OrganizationalInformationComponent } from "./pages/organizational-information/organizational-information.component";
 import { AnalysisComponent } from "./pages/analysis/analysis.component";
 import { ActionsComponent } from "./pages/actions/actions.component";
-import { GraphicsComponent } from "./pages/graphics/graphics.component";
 import { isAdminGuard } from "../auth/guard/isAdmin.guard";
 import { superAdminGuard } from "../auth/guard/super-admin.guard";
 import { Comments } from "./pages/comments/comments";
-
 
 export const dashBoardRoutes: Routes = [
   {
@@ -44,10 +42,6 @@ export const dashBoardRoutes: Routes = [
         path: 'amef/:amefId/analysis/:analysisId/comments',
         component: Comments
       },
-      {
-        path: 'graphics',
-        component: GraphicsComponent
-      }
     ]
   }
 ]

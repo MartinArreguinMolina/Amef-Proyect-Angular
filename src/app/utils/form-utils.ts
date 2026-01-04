@@ -61,7 +61,10 @@ export class FormUtils {
             return 'La contraseña debe contener al menos una letra mayúscula, una letra minúscula y un número o caracter especial.';
           }
 
-          return 'Error no controlado'
+          return 'Error de formato';
+
+          case 'passwordsNotEqual':
+            return 'Las contraseñas no coinciden';
 
         default:
           return `Error de validación no controlado ${key}`;

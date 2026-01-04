@@ -7,6 +7,7 @@ import { firstValueFrom, of } from 'rxjs';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { TitleCasePipe, UpperCasePipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { Sockets } from '../services/sockets.service';
 
 @Component({
   selector: 'app-comments',
@@ -24,11 +25,10 @@ export class Comments implements OnInit, OnDestroy, AfterViewInit {
 
   constructor() {
     effect(() => {
-      const _ = this.comments.value(); // fuerza la dependencia
+      const _ = this.comments.value();
       setTimeout(() => this.scrollTeamToBottom(), 0);
     });
 
-    // Cuando cambian tus comentarios
     effect(() => {
       const _ = this.commentsByUser.value();
       setTimeout(() => this.scrollUserToBottom(), 0);
@@ -54,6 +54,7 @@ export class Comments implements OnInit, OnDestroy, AfterViewInit {
 
   authService = inject(AuthService);
   amefService = inject(AmefService)
+  socketService = inject(Sockets)
   router = inject(ActivatedRoute);
 
   analysisId = signal<string>('')
@@ -70,6 +71,8 @@ export class Comments implements OnInit, OnDestroy, AfterViewInit {
     await firstValueFrom(this.amefService.updateRoomMember(this.roomMember.value()?.id!, {
       lastConnection: new Date().toISOString()
     }))
+
+    this.socketService.disconnect()
   }
 
   ngOnInit() {
@@ -78,15 +81,19 @@ export class Comments implements OnInit, OnDestroy, AfterViewInit {
     const analysisId = this.router.snapshot.paramMap.get('analysisId');
     this.analysisId.set(analysisId!)
 
+
     const amefId = this.router.snapshot.paramMap.get('amefId')
     this.amefId.set(amefId!)
 
 
-    this.amefService.jointCommentRoom(analysisId!)
+    this.socketService.jointCommentRoom(analysisId!)
+    localStorage.setItem('analysisId', this.analysisId())
 
-    if (this.amefService.numberNewComments().get(this.analysisId())! > 0) {
-      this.amefService.resetNumberNewComments(this.analysisId())
+    if (this.socketService.numberNewComments().get(this.analysisId())! > 0) {
+      this.socketService.resetNumberNewComments(this.analysisId())
     }
+
+    this.socketService.connect()
   }
 
   analysis = rxResource({
@@ -94,9 +101,9 @@ export class Comments implements OnInit, OnDestroy, AfterViewInit {
   })
 
   private changeComments = effect(() => {
-    const newComment = this.amefService.comment();
-    const updateComment = this.amefService.commentUpdate();
-    const deletedComment = this.amefService.deletedComment()
+    const newComment = this.socketService.comment();
+    const updateComment = this.socketService.commentUpdate();
+    const deletedComment = this.socketService.deletedComment()
 
     if (newComment) {
       this.comments.reload()

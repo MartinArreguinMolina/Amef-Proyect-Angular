@@ -17,7 +17,7 @@ export class AmefCardComponent {
   amef = input.required<Amef>();
 
   openPdf(amefId: string) {
-    window.open(`${this.baseUrlPdf}${amefId}`)
+    window.open(`${this.baseUrlPdf}${amefId}/pdf`)
   }
 
   downloadExcel(amefId: string){

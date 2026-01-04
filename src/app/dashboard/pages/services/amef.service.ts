@@ -1,91 +1,15 @@
 import { HttpClient } from '@angular/common/http';
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { environments } from '@env/environmets';
 import { ActionCreateDto, ActionItem, Amef, AmefPatch, Analysis, AnalysisDto, Comment, Departament, DtoComments, roomMembers } from '../../interfaces/interfaces';
 import { AnalysisItem, CreateAnalysisPayload, UpdateAnalysisPayload } from '../analysis/analysis.component';
 import { Observable, delay } from 'rxjs';
 import { UserReponse } from '@interfaces/interfaces';
-import { io, Socket } from 'socket.io-client';
-import { AuthService } from 'src/app/auth/service/auth-service.service';
 
 @Injectable({ providedIn: 'root' })
 export class AmefService {
   private http = inject(HttpClient);
   private baseUrl = environments.baseUlr;
-  private socket: Socket;
-  private authService = inject(AuthService)
-
-  comment = signal<Comment | null>(null);
-  commentUpdate = signal<Comment | null>(null);
-  deletedComment = signal<Comment | null>(null);
-  private newCommentCount = signal<Map<string, number>>(new Map())
-
-
-  numberNewComments = computed(() => this.newCommentCount())
-  userId = computed(() => this.authService.user()!.id)
-
-  constructor() {
-    this.socket = io('http://localhost:3000/ws-comments', {
-      autoConnect: true,
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      withCredentials: false,
-    });
-
-    this.socket.on('connect', () => console.log('WS conectado'));
-    this.socket.on('disconnect', (reason) => console.log('WS desconectado:', reason));
-    this.socket.on('connect_error', (err) => console.log('connect_error:', err.message));
-    this.socket.on('reconnect_error', (err) => console.log('reconnect_error:', err.message));
-    this.onCommentNew();
-    this.onUpdateComment();
-    this.onDeleteComment()
-  }
-
-  resetNumberNewComments(id: string) {
-    this.newCommentCount.update(v => {
-      const next = new Map(v);
-      next.delete(id);
-      return next;
-    })
-  }
-
-  jointCommentRoom(analysisId: string) {
-    this.socket.emit('joinRoom', analysisId);
-  }
-
-  onCommentNew() {
-    this.socket.on('comment:new', (data: Comment) => {
-      this.comment.set(data);
-
-      if (this.userId() !== data.user.id) {
-
-        this.newCommentCount.update(prev => {
-          const next = new Map(prev)
-          next.set(data.analysis.id, (next.get(data.analysis.id) ?? 0) + 1)
-
-          return next;
-        })
-
-        console.log('Numero de nuevos comentarios', this.newCommentCount())
-      }
-    });
-  }
-
-  onUpdateComment() {
-    this.socket.on('comment:update', (data: Comment) => {
-      this.commentUpdate.set(data);
-    });
-  }
-
-  onDeleteComment() {
-    this.socket.on('comment:delete', (data: Comment) => {
-      this.deletedComment.set(data)
-    })
-  }
-
-  connect() {
-    if (!this.socket.connected) this.socket.connect()
-  }
 
   getUsersByDepartmentAndTerm(department: string, user: string) {
     return this.http.get<UserReponse[]>(`${this.baseUrl}/auth/department/${department}/user/${user}`)
@@ -241,5 +165,10 @@ export class AmefService {
 
   updateRoomMember(id: string, body: {}) {
     return this.http.patch(`${this.baseUrl}/room-members/${id}`, body)
+  }
+
+  // Mail
+  sendNotificationEmail(data: {}) {
+    return this.http.post(`${this.baseUrl}/mail`, data)
   }
 }
